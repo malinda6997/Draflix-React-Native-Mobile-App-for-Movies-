@@ -6,7 +6,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import {
   FlatList,
-  Image,
   ImageBackground,
   Pressable,
   ScrollView,
@@ -14,6 +13,7 @@ import {
   Text,
   View,
 } from 'react-native'
+import { ChevronLeft, MoreVertical, Heart, Share2, Download } from 'lucide-react-native'
 
 export default function MovieDetailScreen() {
   const params = useLocalSearchParams()
@@ -25,10 +25,7 @@ export default function MovieDetailScreen() {
   const [similarMovies, setSimilarMovies] = useState<any[]>([])
   const [videos, setVideos] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    loadMovieDetails()
-  }, [movieId])
+  const [showFullOverview, setShowFullOverview] = useState(false)
 
   const loadMovieDetails = async () => {
     try {
@@ -49,11 +46,17 @@ export default function MovieDetailScreen() {
     }
   }
 
+  useEffect(() => {
+    loadMovieDetails()
+  }, [movieId])
+
   if (loading || !movie) {
     return <LoadingSpinner />
   }
 
   const youtubeTrailer = videos.find((v) => v.site === 'YouTube' && v.type === 'Trailer')
+  const releaseYear = new Date(movie.release_date).getFullYear()
+  const ratingStars = Math.round(movie.vote_average / 2)
 
   const handleAddWatchlist = async () => {
     await toggleWatchlist(movieId)
@@ -70,119 +73,138 @@ export default function MovieDetailScreen() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Backdrop Image */}
-      <ImageBackground
-        source={{ uri: getImageUrl(movie.backdrop_path, 1280) }}
-        style={styles.backdropContainer}
-        imageStyle={styles.backdropImage}
-      >
-        <View style={styles.backdropOverlay} />
-        <Pressable
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.backButtonText}>← Back</Text>
-        </Pressable>
-      </ImageBackground>
-
-      {/* Movie Content */}
-      <View style={styles.contentContainer}>
-        {/* Title and Rating */}
-        <View style={styles.headerSection}>
-          <Text style={styles.title}>{movie.title}</Text>
-          <View style={styles.metaContainer}>
-            <Text style={styles.rating}>⭐ {movie.vote_average?.toFixed(1)}/10</Text>
-            <Text style={styles.year}>{new Date(movie.release_date).getFullYear()}</Text>
-          </View>
-        </View>
-
-        {/* Synopsis */}
-        <View style={styles.synopsisContainer}>
-          <Text style={styles.sectionTitle}>Synopsis</Text>
-          <Text style={styles.synopsis}>{movie.overview}</Text>
-        </View>
-
-        {/* Movie Details Grid */}
-        <View style={styles.detailsGrid}>
-          <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Budget</Text>
-            <Text style={styles.detailValue}>
-              ${movie.budget ? (movie.budget / 1000000).toFixed(1) + 'M' : 'N/A'}
-            </Text>
-          </View>
-          <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Revenue</Text>
-            <Text style={styles.detailValue}>
-              ${movie.revenue ? (movie.revenue / 1000000).toFixed(1) + 'M' : 'N/A'}
-            </Text>
-          </View>
-          <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Runtime</Text>
-            <Text style={styles.detailValue}>{movie.runtime} min</Text>
-          </View>
-          <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Status</Text>
-            <Text style={styles.detailValue}>{movie.status}</Text>
-          </View>
-        </View>
-
-        {/* Buttons */}
-        <View style={styles.buttonsContainer}>
-          <Pressable
-            style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-            onPress={handleTrailer}
-            disabled={!youtubeTrailer}
+      {/* Poster with overlay */}
+      <View style={styles.posterContainer}>
+        {getImageUrl(movie.poster_path || movie.backdrop_path, 500) && (
+          <ImageBackground
+            source={{ uri: getImageUrl(movie.poster_path || movie.backdrop_path, 500) ?? '' }}
+            style={styles.posterImage}
+            imageStyle={{ borderRadius: 0 }}
           >
-            <Text style={styles.buttonText}>▶ Watch Trailer</Text>
-          </Pressable>
-          <Pressable
-            style={({ pressed }) => [
-              styles.button,
-              styles.watchlistButton,
-              isInWatchlist(movieId) && styles.watchlistButtonActive,
-              pressed && styles.buttonPressed,
-            ]}
-            onPress={handleAddWatchlist}
-          >
-            <Text
-              style={[
-                styles.buttonText,
-                isInWatchlist(movieId) && styles.watchlistButtonText,
-              ]}
+          <View style={styles.posterOverlay} />
+          
+          {/* Header Buttons */}
+          <View style={styles.headerButtons}>
+            <Pressable
+              style={({ pressed }) => [styles.iconButton, pressed && styles.iconButtonPressed]}
+              onPress={() => router.back()}
             >
-              {isInWatchlist(movieId) ? '✓ Saved' : '+ Watchlist'}
+              <ChevronLeft size={28} color="#fff" />
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [styles.iconButton, pressed && styles.iconButtonPressed]}
+            >
+              <MoreVertical size={24} color="#fff" />
+            </Pressable>
+          </View>
+        </ImageBackground>
+      </View>
+
+      {/* Movie Info Section */}
+      <View style={styles.infoSection}>
+        {/* Title */}
+        <Text style={styles.title}>{movie.title}</Text>
+
+        {/* Year, Rating, Duration Row */}
+        <View style={styles.metaRow}>
+          <Text style={styles.year}>{releaseYear}</Text>
+          <View style={styles.ratingRow}>
+            <Text style={styles.starRating}>
+              {Array(ratingStars).fill('★').join('')}
+              {Array(5 - ratingStars).fill('☆').join('')}
             </Text>
-          </Pressable>
+            <Text style={styles.ratingValue}>{movie.vote_average?.toFixed(1)}</Text>
+          </View>
+          <Text style={styles.duration}>{movie.runtime}min</Text>
         </View>
 
         {/* Genres */}
         {movie.genres && movie.genres.length > 0 && (
-          <View style={styles.genresContainer}>
-            <Text style={styles.sectionTitle}>Genres</Text>
-            <View style={styles.genresWrapper}>
-              {movie.genres.map((genre: any) => (
-                <View key={genre.id} style={styles.genreTag}>
-                  <Text style={styles.genreText}>{genre.name}</Text>
-                </View>
-              ))}
-            </View>
+          <View style={styles.genresRow}>
+            {movie.genres.slice(0, 2).map((genre: any) => (
+              <Text key={genre.id} style={styles.genreTag}>
+                {genre.name}
+              </Text>
+            ))}
           </View>
         )}
 
-        {/* Similar Movies */}
+        {/* Main Action Buttons */}
+        <View style={styles.mainButtons}>
+          <Pressable
+            style={({ pressed }) => [styles.trailerButton, pressed && styles.buttonPressed]}
+            onPress={handleTrailer}
+            disabled={!youtubeTrailer}
+          >
+            <Text style={styles.trailerButtonText}>▶ Trailer</Text>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [styles.watchButton, pressed && styles.buttonPressed]}
+          >
+            <Text style={styles.watchButtonText}>▶ Watch now</Text>
+          </Pressable>
+        </View>
+
+        {/* Secondary Action Buttons */}
+        <View style={styles.secondaryButtons}>
+          <Pressable
+            style={({ pressed }) => [styles.actionButton, pressed && styles.actionButtonPressed]}
+            onPress={handleAddWatchlist}
+          >
+            <Heart 
+              size={16} 
+              color={isInWatchlist(movieId) ? '#fff' : '#999'}
+              fill={isInWatchlist(movieId) ? '#fff' : 'none'}
+            />
+            <Text style={styles.actionButtonText}>Save</Text>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [styles.actionButton, pressed && styles.actionButtonPressed]}
+          >
+            <Share2 size={16} color="#999" />
+            <Text style={styles.actionButtonText}>Share</Text>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [styles.actionButton, pressed && styles.actionButtonPressed]}
+          >
+            <Download size={16} color="#999" />
+            <Text style={styles.actionButtonText}>Download</Text>
+          </Pressable>
+        </View>
+
+        {/* Storyline */}
+        <View style={styles.storylineSection}>
+          <Text style={styles.sectionTitle}>Storyline</Text>
+          <Text 
+            style={styles.overview}
+            numberOfLines={showFullOverview ? undefined : 4}
+          >
+            {movie.overview}
+          </Text>
+          {!showFullOverview && (
+            <Pressable onPress={() => setShowFullOverview(true)}>
+              <Text style={styles.readMore}>Read more ⌄</Text>
+            </Pressable>
+          )}
+        </View>
+
+        {/* More Like This */}
         {similarMovies.length > 0 && (
-          <View style={styles.similarContainer}>
-            <Text style={styles.sectionTitle}>More Like This</Text>
+          <View style={styles.moreSection}>
+            <Text style={styles.sectionTitle}>More like this</Text>
             <FlatList
               data={similarMovies.slice(0, 10)}
-              renderItem={({ item }) => <MovieCard movie={item} width={150} height={225} />}
+              renderItem={({ item }) => <MovieCard movie={item} width={110} height={165} />}
               keyExtractor={(item) => item.id.toString()}
               horizontal
               showsHorizontalScrollIndicator={false}
               scrollEventThrottle={16}
+              contentContainerStyle={styles.moviesScroll}
             />
           </View>
         )}
+
+        <View style={{ height: 40 }} />
       </View>
     </ScrollView>
   )
@@ -191,35 +213,42 @@ export default function MovieDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#0d1b2a',
   },
-  backdropContainer: {
-    height: 250,
-    justifyContent: 'flex-start',
-    paddingTop: 16,
+  posterContainer: {
+    height: 400,
+    width: '100%',
+  },
+  posterImage: {
+    flex: 1,
+    justifyContent: 'space-between',
+    paddingTop: 20,
     paddingHorizontal: 16,
+    paddingBottom: 20,
   },
-  backdropImage: {
-    opacity: 0.4,
-  },
-  backdropOverlay: {
+  posterOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
-  backButton: {
-    alignSelf: 'flex-start',
+  headerButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
-  backButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+  iconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  contentContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 24,
+  iconButtonPressed: {
+    opacity: 0.7,
   },
-  headerSection: {
-    marginBottom: 20,
+  infoSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    backgroundColor: '#0d1b2a',
   },
   title: {
     color: '#fff',
@@ -227,20 +256,116 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 12,
   },
-  metaContainer: {
+  metaRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 16,
+    marginBottom: 12,
   },
-  rating: {
+  year: {
+    color: '#999',
+    fontSize: 13,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  starRating: {
     color: '#ffd700',
     fontSize: 14,
     fontWeight: '600',
   },
-  year: {
+  ratingValue: {
     color: '#999',
-    fontSize: 14,
+    fontSize: 12,
   },
-  synopsisContainer: {
+  duration: {
+    color: '#999',
+    fontSize: 13,
+  },
+  genresRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  genreTag: {
+    backgroundColor: '#0f2438',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#1a3a52',
+  },
+  genreText: {
+    color: '#ccc',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  mainButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 12,
+  },
+  trailerButton: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingVertical: 14,
+    borderRadius: 12,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+  },
+  trailerButtonText: {
+    color: '#0d1b2a',
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  watchButton: {
+    flex: 1,
+    backgroundColor: '#0066cc',
+    paddingVertical: 14,
+    borderRadius: 12,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+  },
+  watchButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  buttonPressed: {
+    opacity: 0.8,
+  },
+  secondaryButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
+  },
+  actionButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#0f2438',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 1,
+    borderColor: '#1a3a52',
+  },
+  actionButtonPressed: {
+    opacity: 0.7,
+  },
+  actionButtonText: {
+    color: '#999',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  storylineSection: {
     marginBottom: 24,
   },
   sectionTitle: {
@@ -249,89 +374,21 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 12,
   },
-  synopsis: {
-    color: '#ccc',
+  overview: {
+    color: '#aaa',
     fontSize: 13,
     lineHeight: 20,
+    marginBottom: 8,
   },
-  detailsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 24,
-    gap: 12,
-  },
-  detailItem: {
-    width: '48%',
-    backgroundColor: '#1a1a1a',
-    paddingHorizontal: 12,
-    paddingVertical: 16,
-    borderRadius: 8,
-  },
-  detailLabel: {
-    color: '#666',
-    fontSize: 11,
-    fontWeight: '600',
-    marginBottom: 6,
-  },
-  detailValue: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  buttonsContainer: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 24,
-  },
-  button: {
-    flex: 1,
-    backgroundColor: '#0a7ea4',
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  watchlistButton: {
-    backgroundColor: '#1a1a1a',
-    borderWidth: 1,
-    borderColor: '#333',
-  },
-  watchlistButtonActive: {
-    backgroundColor: '#0a7ea4',
-    borderColor: '#0a7ea4',
-  },
-  watchlistButtonText: {
-    color: '#fff',
-  },
-  buttonPressed: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '700',
+  readMore: {
+    color: '#999',
     fontSize: 13,
-  },
-  genresContainer: {
-    marginBottom: 24,
-  },
-  genresWrapper: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  genreTag: {
-    backgroundColor: '#1a1a1a',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#333',
-  },
-  genreText: {
-    color: '#0a7ea4',
-    fontSize: 12,
     fontWeight: '600',
   },
-  similarContainer: {
-    marginBottom: 40,
+  moreSection: {
+    marginBottom: 24,
+  },
+  moviesScroll: {
+    gap: 8,
   },
 })

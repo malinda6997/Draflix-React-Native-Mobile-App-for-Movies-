@@ -75,6 +75,16 @@ export const tmdbApi = {
       },
     }),
 
+  // Get drama movies (genre id 18)
+  getDramaMovies: () =>
+    api.get('/discover/movie', {
+      params: {
+        language: 'en-US',
+        with_genres: '18',
+        sort_by: 'popularity.desc',
+      },
+    }),
+
   // Get sci-fi movies (genre id 878)
   getSciFiMovies: () =>
     api.get('/discover/movie', {
@@ -88,6 +98,12 @@ export const tmdbApi = {
   // Get top-rated movies
   getTopRated: () =>
     api.get('/movie/top_rated', {
+      params: { language: 'en-US' },
+    }),
+
+  // Get popular movies
+  getPopular: () =>
+    api.get('/movie/popular', {
       params: { language: 'en-US' },
     }),
 }

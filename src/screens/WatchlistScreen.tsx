@@ -1,10 +1,10 @@
 import { MovieCard } from '@/src/components/MovieCard'
 import { useWatchlist } from '@/src/hooks/useWatchlist'
-import { useRoute } from '@react-navigation/native'
 import { useFocusEffect } from '@react-navigation/native'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback } from 'react'
 import {
   FlatList,
+  SafeAreaView,
   StyleSheet,
   Text,
   View,
@@ -34,11 +34,10 @@ const MOCK_MOVIES: { [key: number]: any } = {
 
 export default function WatchlistScreen() {
   const { watchlist } = useWatchlist()
-  const [refetch, setRefetch] = useState(false)
 
   useFocusEffect(
     useCallback(() => {
-      setRefetch(!refetch)
+      // Refetch watchlist on focus
     }, [])
   )
 
@@ -72,23 +71,29 @@ export default function WatchlistScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.title}>My Watchlist</Text>
-        {moviesData.length > 0 && (
-          <Text style={styles.count}>{moviesData.length} movies</Text>
-        )}
-      </View>
+    <SafeAreaView style={styles.safeContainer}>
+      <View style={styles.container}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.title}>My Watchlist</Text>
+          {moviesData.length > 0 && (
+            <Text style={styles.count}>{moviesData.length} movies</Text>
+          )}
+        </View>
 
-      {renderMovieGrid()}
-    </View>
+        {renderMovieGrid()}
+      </View>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
+  safeContainer: {
+    flex: 1,
+    backgroundColor: '#0d1b2a',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#0d1b2a',
     paddingHorizontal: 20,
     paddingTop: 20,
   },

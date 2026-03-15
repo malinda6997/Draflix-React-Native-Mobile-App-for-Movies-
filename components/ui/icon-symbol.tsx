@@ -1,3 +1,4 @@
+import React from 'react'
 import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { OpaqueColorValue, StyleProp, ViewStyle } from 'react-native'
 
@@ -7,6 +8,8 @@ export type IconSymbolName =
   | 'bookmark.fill'
   | 'person.fill'
   | 'magnifyingglass'
+  | 'play.fill'
+  | 'arrow.down.circle.fill'
 
 interface Props {
   name: IconSymbolName
@@ -22,10 +25,23 @@ const iconMap: { [key in IconSymbolName]: { library: string; name: string } } = 
   'bookmark.fill': { library: 'MaterialCommunityIcons', name: 'bookmark' },
   'person.fill': { library: 'MaterialCommunityIcons', name: 'account' },
   'magnifyingglass': { library: 'MaterialCommunityIcons', name: 'magnify' },
+  'play.fill': { library: 'MaterialCommunityIcons', name: 'play' },
+  'arrow.down.circle.fill': { library: 'MaterialCommunityIcons', name: 'download-circle' },
 }
 
 export function IconSymbol({ name, size = 24, color, style }: Props) {
-  const icon = iconMap[name] || iconMap['house.fill']
+  const icon = iconMap[name]
+
+  if (!icon) {
+    return (
+      <MaterialCommunityIcons
+        name="alert-circle"
+        size={size}
+        color={color}
+        style={style as any}
+      />
+    )
+  }
 
   if (icon.library === 'MaterialCommunityIcons') {
     return (
@@ -33,7 +49,7 @@ export function IconSymbol({ name, size = 24, color, style }: Props) {
         name={icon.name as any}
         size={size}
         color={color}
-        style={style}
+        style={style as any}
       />
     )
   }
@@ -44,7 +60,7 @@ export function IconSymbol({ name, size = 24, color, style }: Props) {
         name={icon.name as any}
         size={size}
         color={color}
-        style={style}
+        style={style as any}
       />
     )
   }
@@ -54,7 +70,7 @@ export function IconSymbol({ name, size = 24, color, style }: Props) {
       name={icon.name as any}
       size={size}
       color={color}
-      style={style}
+      style={style as any}
     />
   )
 }

@@ -3,6 +3,8 @@ import { Image } from 'expo-image'
 import React from 'react'
 import {
   Pressable,
+  SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -21,69 +23,75 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      {/* User Profile Card */}
-      <View style={styles.profileCard}>
-        {user?.imageUrl && (
-          <Image
-            source={{ uri: user.imageUrl }}
-            style={styles.avatar}
-          />
-        )}
-        <Text style={styles.userName}>
-          {user?.firstName || 'User'} {user?.lastName || ''}
-        </Text>
-        <Text style={styles.userEmail}>{user?.emailAddresses[0]?.emailAddress}</Text>
-      </View>
-
-      {/* Quick Stats */}
-      <View style={styles.statsContainer}>
-        <View style={styles.stat}>
-          <Text style={styles.statNumber}>0</Text>
-          <Text style={styles.statLabel}>Watchlist</Text>
+    <SafeAreaView style={styles.safeContainer}>
+      <ScrollView style={styles.container}>
+        {/* User Profile Card */}
+        <View style={styles.profileCard}>
+          {user?.imageUrl && (
+            <Image
+              source={{ uri: user.imageUrl }}
+              style={styles.avatar}
+            />
+          )}
+          <Text style={styles.userName}>
+            {user?.firstName || 'User'} {user?.lastName || ''}
+          </Text>
+          <Text style={styles.userEmail}>{user?.emailAddresses[0]?.emailAddress}</Text>
         </View>
-        <View style={styles.stat}>
-          <Text style={styles.statNumber}>0</Text>
-          <Text style={styles.statLabel}>Watched</Text>
-        </View>
-        <View style={styles.stat}>
-          <Text style={styles.statNumber}>0</Text>
-          <Text style={styles.statLabel}>Reviews</Text>
-        </View>
-      </View>
 
-      {/* Settings Section */}
-      <View style={styles.settingsSection}>
-        <Text style={styles.sectionTitle}>Account</Text>
-        <Pressable style={styles.settingItem}>
-          <Text style={styles.settingLabel}>Edit Profile</Text>
-        </Pressable>
-        <Pressable style={styles.settingItem}>
-          <Text style={styles.settingLabel}>Notifications</Text>
-        </Pressable>
-        <Pressable style={styles.settingItem}>
-          <Text style={styles.settingLabel}>Privacy Settings</Text>
-        </Pressable>
-      </View>
+        {/* Quick Stats */}
+        <View style={styles.statsContainer}>
+          <View style={styles.stat}>
+            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statLabel}>Watchlist</Text>
+          </View>
+          <View style={styles.stat}>
+            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statLabel}>Watched</Text>
+          </View>
+          <View style={styles.stat}>
+            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statLabel}>Reviews</Text>
+          </View>
+        </View>
 
-      {/* Sign Out Button */}
-      <Pressable
-        style={({ pressed }) => [
-          styles.signOutButton,
-          pressed && styles.signOutButtonPressed,
-        ]}
-        onPress={handleSignOut}
-      >
-        <Text style={styles.signOutText}>Sign Out</Text>
-      </Pressable>
-    </View>
+        {/* Settings Section */}
+        <View style={styles.settingsSection}>
+          <Text style={styles.sectionTitle}>Account</Text>
+          <Pressable style={styles.settingItem}>
+            <Text style={styles.settingLabel}>Edit Profile</Text>
+          </Pressable>
+          <Pressable style={styles.settingItem}>
+            <Text style={styles.settingLabel}>Notifications</Text>
+          </Pressable>
+          <Pressable style={styles.settingItem}>
+            <Text style={styles.settingLabel}>Privacy Settings</Text>
+          </Pressable>
+        </View>
+
+        {/* Sign Out Button */}
+        <Pressable
+          style={({ pressed }) => [
+            styles.signOutButton,
+            pressed && styles.signOutButtonPressed,
+          ]}
+          onPress={handleSignOut}
+        >
+          <Text style={styles.signOutText}>Sign Out</Text>
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
+  safeContainer: {
+    flex: 1,
+    backgroundColor: '#0a0e27',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#0d1b2a',
     paddingHorizontal: 20,
     paddingTop: 20,
   },
@@ -156,7 +164,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
-    marginBottom: 40,
+    marginBottom: 20,
   },
   signOutButtonPressed: {
     opacity: 0.7,
