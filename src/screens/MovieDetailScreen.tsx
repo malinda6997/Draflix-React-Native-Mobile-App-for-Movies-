@@ -13,6 +13,7 @@ import {
   Text,
   View,
 } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import { ChevronLeft, MoreVertical, Heart, Share2, Download } from 'lucide-react-native'
 
 export default function MovieDetailScreen() {
@@ -82,7 +83,11 @@ export default function MovieDetailScreen() {
           style={styles.posterImage}
           imageStyle={{ borderRadius: 0, resizeMode: 'cover' }}
         >
-          <View style={styles.posterOverlay} />
+          <LinearGradient
+            colors={['transparent', 'rgba(0, 0, 0, 0.4)', 'rgba(0, 0, 0, 0.8)']}
+            locations={[0, 0.5, 1]}
+            style={styles.posterGradient}
+          />
           
           {/* Header Buttons - Top */}
           <View style={styles.headerButtons}>
@@ -233,9 +238,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  posterOverlay: {
+  posterGradient: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    opacity: 1,
   },
   headerButtons: {
     flexDirection: 'row',
