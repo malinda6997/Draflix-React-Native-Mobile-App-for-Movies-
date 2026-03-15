@@ -36,8 +36,7 @@ export default function SignUpPage() {
       })
 
       if (signUp.status === 'complete') {
-        await signUp.createdSessionId !== null &&
-          router.push('/' as Href)
+        router.push('/' as Href)
       } else {
         console.error('Sign-up incomplete:', signUp)
       }

@@ -22,23 +22,7 @@ export default function Page() {
     }
 
     if (signIn.status === 'complete') {
-      await signIn.finalize({
-        navigate: ({ session, decorateUrl }) => {
-          if (session?.currentTask) {
-            // Handle pending session tasks
-            // See https://clerk.com/docs/guides/development/custom-flows/authentication/session-tasks
-            console.log(session?.currentTask)
-            return
-          }
-
-          const url = decorateUrl('/')
-          if (url.startsWith('http')) {
-            window.location.href = url
-          } else {
-            router.push(url as Href)
-          }
-        },
-      })
+      router.push('/' as Href)
     } else if (signIn.status === 'needs_second_factor' || signIn.status === 'needs_client_trust') {
       // Handle second factor or client trust verification
       // For other second factor strategies,
@@ -61,23 +45,7 @@ export default function Page() {
     await signIn.mfa.verifyEmailCode({ code })
 
     if (signIn.status === 'complete') {
-      await signIn.finalize({
-        navigate: ({ session, decorateUrl }) => {
-          if (session?.currentTask) {
-            // Handle pending session tasks
-            // See https://clerk.com/docs/guides/development/custom-flows/authentication/session-tasks
-            console.log(session?.currentTask)
-            return
-          }
-
-          const url = decorateUrl('/')
-          if (url.startsWith('http')) {
-            window.location.href = url
-          } else {
-            router.push(url as Href)
-          }
-        },
-      })
+      router.push('/' as Href)
     } else {
       // Check why the sign-in is not complete
       console.error('Sign-in attempt not complete:', signIn)
