@@ -1,5 +1,4 @@
 import { useAuth } from '@clerk/expo'
-import LinearGradient from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import React, { useEffect } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
@@ -21,8 +20,7 @@ export default function SplashScreen() {
   }
 
   return (
-    <LinearGradient
-      colors={['#000000', '#1a1a2e']}
+    <View
       style={styles.container}
     >
       <View style={styles.content}>
@@ -57,7 +55,7 @@ export default function SplashScreen() {
           Sign in or create an account to get started
         </Text>
       </View>
-    </LinearGradient>
+    </View>
   )
 }
 
@@ -66,6 +64,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: '#000',
   },
   content: {
     flex: 1,
