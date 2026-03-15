@@ -13,10 +13,6 @@ if (!publishableKey) {
   throw new Error('Add your Clerk Publishable Key to the .env file')
 }
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
-
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
@@ -24,11 +20,25 @@ export default function RootLayout() {
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+          <Stack.Screen 
+            name="movie-detail" 
+            options={{ 
+              headerShown: false,
+              animationEnabled: true 
+            }} 
+          />
+          <Stack.Screen 
+            name="trailer" 
+            options={{ 
+              headerShown: false,
+              animationEnabled: true 
+            }} 
+          />
         </Stack>
-        <StatusBar style="auto" />
+        <StatusBar style="light" />
       </ThemeProvider>
     </ClerkProvider>
   );
