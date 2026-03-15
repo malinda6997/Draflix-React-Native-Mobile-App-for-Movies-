@@ -1,22 +1,21 @@
-import { useAuth } from '@clerk/expo'
 import { useRouter } from 'expo-router'
 import React, { useEffect } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 
 export default function SplashScreen() {
   const router = useRouter()
-  const { isSignedIn, isLoaded } = useAuth()
 
   useEffect(() => {
-    if (isLoaded) {
-      if (isSignedIn) {
-        router.replace('/(tabs)')
-      }
-    }
-  }, [isLoaded, isSignedIn])
+    // Skip directly to home after 2 seconds
+    const timer = setTimeout(() => {
+      router.replace('/(tabs)')
+    }, 2000)
+
+    return () => clearTimeout(timer)
+  }, [router])
 
   const handleStartNow = () => {
-    router.push('/(auth)/sign-in')
+    router.push('/(tabs)')
   }
 
   return (

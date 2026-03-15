@@ -1,11 +1,9 @@
-import { tmdbApi } from '@/src/api/tmdbApi'
+import { tmdbApi, getImageUrl } from '@/src/api/tmdbApi'
 import { HorizontalMovieScroll } from '@/src/components/HorizontalMovieScroll'
 import { LoadingSpinner } from '@/src/components/LoadingSpinner'
-import { getImageUrl } from '@/src/api/tmdbApi'
 import { useFocusEffect } from '@react-navigation/native'
 import React, { useCallback, useState } from 'react'
 import {
-  Image,
   ImageBackground,
   Pressable,
   ScrollView,
@@ -66,7 +64,7 @@ export default function HomeScreen() {
       {featuredMovie && (
         <ImageBackground
           source={{
-            uri: getImageUrl(featuredMovie.backdrop_path, 1280),
+            uri: getImageUrl(featuredMovie.backdrop_path, 1280) || '',
           }}
           style={styles.heroSection}
           imageStyle={styles.heroImage}

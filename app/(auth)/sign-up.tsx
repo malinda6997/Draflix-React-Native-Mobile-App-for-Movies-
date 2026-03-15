@@ -1,7 +1,11 @@
 import { useSignUp } from '@clerk/expo'
+import * as WebBrowser from 'expo-web-browser'
 import { type Href, Link, useRouter } from 'expo-router'
 import React from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+
+// Warm up browser for faster OAuth
+WebBrowser.maybeCompleteAuthSession()
 
 export default function SignUpPage() {
   const { signUp, errors, fetchStatus } = useSignUp()
@@ -12,6 +16,7 @@ export default function SignUpPage() {
   const [code, setCode] = React.useState('')
   const [firstName, setFirstName] = React.useState('')
   const [lastName, setLastName] = React.useState('')
+  const [loadingGoogle, setLoadingGoogle] = React.useState(false)
 
   const handleSubmit = async () => {
     try {
@@ -42,6 +47,24 @@ export default function SignUpPage() {
       }
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2))
+    }
+  }
+
+  const handleGoogleSignUp = async () => {
+    setLoadingGoogle(true)
+    try {
+      // Use Clerk's native OAuth method with expo-web-browser
+      const result = await signUp.create({
+        strategy: 'oauth_google',
+      })
+
+      if (result.status === 'complete') {
+        router.push('/' as Href)
+      }
+    } catch (error: any) {
+      console.error('Google Sign-Up error:', error)
+    } finally {
+      setLoadingGoogle(false)
     }
   }
 
@@ -78,6 +101,28 @@ export default function SignUpPage() {
   return (
     <View style={styles.container}>
       <Text style={[styles.title, { fontSize: 24, fontWeight: 'bold' }]}>Sign up</Text>
+
+      {/* Google Sign-Up Button */}
+      <Pressable
+        style={({ pressed }) => [
+          styles.googleButton,
+          loadingGoogle && styles.buttonDisabled,
+          pressed && styles.buttonPressed,
+        ]}
+        onPress={handleGoogleSignUp}
+        disabled={loadingGoogle}
+      >
+        <Text style={styles.googleButtonText}>
+          {loadingGoogle ? 'Signing up...' : '🔐 Sign up with Google'}
+        </Text>
+      </Pressable>
+
+      {/* Divider */}
+      <View style={styles.dividerContainer}>
+        <View style={styles.divider} />
+        <Text style={styles.dividerText}>or continue with email</Text>
+        <View style={styles.divider} />
+      </View>
       
       <Text style={styles.label}>First Name</Text>
       <TextInput
@@ -181,6 +226,37 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 8,
+  },
+  googleButton: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 8,
+    marginBottom: 20,
+  },
+  googleButtonText: {
+    color: '#000',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 12,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#ccc',
+  },
+  dividerText: {
+    marginHorizontal: 12,
+    color: '#666',
+    fontSize: 12,
   },
   buttonPressed: {
     opacity: 0.7,
