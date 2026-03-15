@@ -37,6 +37,13 @@ export default function RootLayout() {
               animationEnabled: true 
             }} 
           />
+          <Stack.Screen 
+            name="category" 
+            options={{ 
+              headerShown: false,
+              animationEnabled: true 
+            }} 
+          />
         </Stack>
         <StatusBar style="light" />
       </ThemeProvider>

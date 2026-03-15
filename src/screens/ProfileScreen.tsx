@@ -87,11 +87,11 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
-    backgroundColor: '#0a0e27',
+    backgroundColor: '#0a0a15',
   },
   container: {
     flex: 1,
-    backgroundColor: '#0d1b2a',
+    backgroundColor: '#0a0a15',
     paddingHorizontal: 20,
     paddingTop: 20,
   },

@@ -1,8 +1,8 @@
 import { tmdbApi } from '@/src/api/tmdbApi'
 import { HorizontalMovieScroll } from '@/src/components/HorizontalMovieScroll'
 import { LoadingSpinner } from '@/src/components/LoadingSpinner'
-import { useFocusEffect } from '@react-navigation/native'
-import React, { useCallback, useState } from 'react'
+import { useRouter } from 'expo-router'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   Pressable,
   SafeAreaView,
@@ -15,13 +15,21 @@ import {
 import { Bell, Search } from 'lucide-react-native'
 
 export default function HomeScreen() {
+  const router = useRouter()
   const [trendingMovies, setTrendingMovies] = useState<any[]>([])
   const [actionMovies, setActionMovies] = useState<any[]>([])
   const [comedyMovies, setComedyMovies] = useState<any[]>([])
   const [topRatedMovies, setTopRatedMovies] = useState<any[]>([])
   const [dramaMovies, setDramaMovies] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedGenre, setSelectedGenre] = useState('All')
+  const [titleIndex, setTitleIndex] = useState(0)
+
+  const mainTitles = [
+    { first: 'Discover Your Next', second: 'Favorite Movie.' },
+    { first: 'Stream The Best', second: 'Movies Today.' },
+    { first: 'Find Your Next', second: 'Binge Watch.' },
+    { first: 'Explore Trending', second: 'Films Now.' },
+  ]
 
   const loadMovies = useCallback(async () => {
     try {
@@ -46,17 +54,33 @@ export default function HomeScreen() {
     }
   }, [])
 
-  useFocusEffect(
-    useCallback(() => {
-      loadMovies()
-    }, [loadMovies])
-  )
+  useEffect(() => {
+    loadMovies()
+  }, [loadMovies])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTitleIndex((prevIndex) => (prevIndex + 1) % mainTitles.length)
+    }, 30000)
+
+    return () => clearInterval(interval)
+  }, [mainTitles.length])
 
   if (loading && trendingMovies.length === 0) {
     return <LoadingSpinner />
   }
 
-  const genres = ['All', 'Action', 'Drama', 'Comedy', 'Science']
+  const genres = [
+    { name: 'Action', type: 'action' },
+    { name: 'Drama', type: 'drama' },
+    { name: 'Comedy', type: 'comedy' },
+    { name: 'Thriller', type: 'thriller' },
+    { name: 'Horror', type: 'horror' },
+    { name: 'Romance', type: 'romance' },
+    { name: 'Adventure', type: 'adventure' },
+    { name: 'Fantasy', type: 'fantasy' },
+    { name: 'Animation', type: 'animation' },
+  ]
 
   return (
     <SafeAreaView style={styles.safeContainer}>
@@ -94,8 +118,8 @@ export default function HomeScreen() {
 
       {/* Main Title */}
       <View style={styles.titleContainer}>
-        <Text style={styles.mainTitle}>Discover Your Next</Text>
-        <Text style={[styles.mainTitle, styles.mainTitleBold]}>Favorite Movie.</Text>
+        <Text style={styles.mainTitle}>{mainTitles[titleIndex].first}</Text>
+        <Text style={[styles.mainTitle, styles.mainTitleBold]}>{mainTitles[titleIndex].second}</Text>
       </View>
 
       {/* Genre Chips */}
@@ -107,20 +131,15 @@ export default function HomeScreen() {
       >
         {genres.map((genre) => (
           <Pressable
-            key={genre}
-            style={[
-              styles.genreChip,
-              selectedGenre === genre && styles.genreChipActive,
-            ]}
-            onPress={() => setSelectedGenre(genre)}
+            key={genre.type}
+            style={styles.genreChip}
+            onPress={() => router.push({
+              pathname: '/category',
+              params: { name: genre.name, type: genre.type }
+            } as any)}
           >
-            <Text
-              style={[
-                styles.genreText,
-                selectedGenre === genre && styles.genreTextActive,
-              ]}
-            >
-              {genre}
+            <Text style={styles.genreText}>
+              {genre.name}
             </Text>
           </Pressable>
         ))}
@@ -131,34 +150,39 @@ export default function HomeScreen() {
         title="Latest movies"
         movies={trendingMovies}
         loading={loading}
+        onSeeMore={() => router.push({ pathname: '/category', params: { name: 'Latest movies', type: 'trending' } } as any)}
       />
 
       {/* Upcoming & Trending with Trailers */}
       <HorizontalMovieScroll
-        title="Trending Now 🔥"
+        title="Trending Now"
         movies={actionMovies}
         loading={loading}
+        onSeeMore={() => router.push({ pathname: '/category', params: { name: 'Trending Now', type: 'action' } } as any)}
       />
 
       {/* Comedy Movies */}
       <HorizontalMovieScroll
-        title="Comedy Pick 😂"
+        title="Comedy Pick"
         movies={comedyMovies}
         loading={loading}
+        onSeeMore={() => router.push({ pathname: '/category', params: { name: 'Comedy Pick', type: 'comedy' } } as any)}
       />
 
       {/* Drama Movies */}
       <HorizontalMovieScroll
-        title="Drama Series 🎭"
+        title="Drama Series"
         movies={dramaMovies}
         loading={loading}
+        onSeeMore={() => router.push({ pathname: '/category', params: { name: 'Drama Series', type: 'drama' } } as any)}
       />
 
       {/* Top Rated Movies */}
       <HorizontalMovieScroll
-        title="Top Rated ⭐"
+        title="Top Rated"
         movies={topRatedMovies}
         loading={loading}
+        onSeeMore={() => router.push({ pathname: '/category', params: { name: 'Top Rated', type: 'topRated' } } as any)}
       />
       </ScrollView>
     </SafeAreaView>
@@ -168,11 +192,11 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
-    backgroundColor: '#0d1b2a',
+    backgroundColor: '#0a0a15',
   },
   container: {
     flex: 1,
-    backgroundColor: '#0d1b2a',
+    backgroundColor: '#0a0a15',
   },
   header: {
     flexDirection: 'row',
@@ -191,10 +215,10 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#0066cc',
+    backgroundColor: '#093FB4',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#0066cc',
+    shadowColor: '#093FB4',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -224,14 +248,14 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#0f2438',
+    backgroundColor: '#0a0f15',
     borderRadius: 12,
     paddingHorizontal: 14,
     height: 44,
     gap: 10,
     borderWidth: 1,
-    borderColor: '#1a3a52',
-    shadowColor: '#0066cc',
+    borderColor: '#333333',
+    shadowColor: '#093FB4',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -254,7 +278,7 @@ const styles = StyleSheet.create({
   },
   mainTitleBold: {
     fontWeight: '700',
-    color: '#0066cc',
+    color: '#093FB4',
   },
   genreScroll: {
     marginVertical: 16,
@@ -267,25 +291,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 10,
     borderRadius: 22,
-    backgroundColor: '#0f2438',
+    backgroundColor: '#0a0f15',
     borderWidth: 1,
-    borderColor: '#1a3a52',
-  },
-  genreChipActive: {
-    backgroundColor: '#0066cc',
-    borderColor: '#0066cc',
-    shadowColor: '#0066cc',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
+    borderColor: '#333333',
   },
   genreText: {
     color: '#999',
     fontSize: 13,
     fontWeight: '500',
-  },
-  genreTextActive: {
-    color: '#fff',
-    fontWeight: '600',
   },
 })

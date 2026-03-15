@@ -3,7 +3,7 @@ import { MovieCard } from '@/src/components/MovieCard'
 import { LoadingSpinner } from '@/src/components/LoadingSpinner'
 import { useWatchlist } from '@/src/hooks/useWatchlist'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   FlatList,
   ImageBackground,
@@ -27,7 +27,7 @@ export default function MovieDetailScreen() {
   const [loading, setLoading] = useState(true)
   const [showFullOverview, setShowFullOverview] = useState(false)
 
-  const loadMovieDetails = async () => {
+  const loadMovieDetails = useCallback(async () => {
     try {
       setLoading(true)
       const [detailsRes, similarRes, videosRes] = await Promise.all([
@@ -44,11 +44,11 @@ export default function MovieDetailScreen() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [movieId])
 
   useEffect(() => {
     loadMovieDetails()
-  }, [movieId])
+  }, [loadMovieDetails])
 
   if (loading || !movie) {
     return <LoadingSpinner />
@@ -75,12 +75,13 @@ export default function MovieDetailScreen() {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Poster with overlay */}
       <View style={styles.posterContainer}>
-        {getImageUrl(movie.poster_path || movie.backdrop_path, 500) && (
-          <ImageBackground
-            source={{ uri: getImageUrl(movie.poster_path || movie.backdrop_path, 500) ?? '' }}
-            style={styles.posterImage}
-            imageStyle={{ borderRadius: 0 }}
-          >
+        <ImageBackground
+          source={{
+            uri: getImageUrl(movie.poster_path || movie.backdrop_path, 500) ?? 'https://via.placeholder.com/500x300'
+          }}
+          style={styles.posterImage}
+          imageStyle={{ borderRadius: 0 }}
+        >
           <View style={styles.posterOverlay} />
           
           {/* Header Buttons */}
@@ -213,7 +214,7 @@ export default function MovieDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0d1b2a',
+    backgroundColor: '#0a0a15',
   },
   posterContainer: {
     height: 400,
@@ -248,7 +249,7 @@ const styles = StyleSheet.create({
   infoSection: {
     paddingHorizontal: 16,
     paddingVertical: 20,
-    backgroundColor: '#0d1b2a',
+    backgroundColor: '#0a0a15',
   },
   title: {
     color: '#fff',
@@ -318,13 +319,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   trailerButtonText: {
-    color: '#0d1b2a',
+    color: '#0D1A63',
     fontWeight: '700',
     fontSize: 15,
   },
   watchButton: {
     flex: 1,
-    backgroundColor: '#0066cc',
+    backgroundColor: '#093FB4',
     paddingVertical: 14,
     borderRadius: 12,
     flexDirection: 'row',
@@ -349,13 +350,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     borderRadius: 8,
-    backgroundColor: '#0f2438',
+    backgroundColor: '#0a0f15',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 6,
     borderWidth: 1,
-    borderColor: '#1a3a52',
+    borderColor: '#333333',
   },
   actionButtonPressed: {
     opacity: 0.7,

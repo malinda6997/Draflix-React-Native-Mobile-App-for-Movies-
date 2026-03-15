@@ -1,21 +1,30 @@
 import { MovieCard } from './MovieCard'
 import React from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native'
 
 interface HorizontalMovieScrollProps {
   title: string
   movies: any[]
   loading?: boolean
+  onSeeMore?: () => void
 }
 
 export const HorizontalMovieScroll: React.FC<HorizontalMovieScrollProps> = ({
   title,
   movies,
   loading = false,
+  onSeeMore,
 }) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
+      <View style={styles.titleRow}>
+        <Text style={styles.title}>{title}</Text>
+        {onSeeMore && (
+          <Pressable style={styles.seeMoreButton} onPress={onSeeMore}>
+            <Text style={styles.seeMoreText}>See more</Text>
+          </Pressable>
+        )}
+      </View>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -44,12 +53,30 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 24,
   },
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+    marginHorizontal: 20,
+  },
   title: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '700',
-    marginBottom: 12,
-    marginHorizontal: 20,
+    flex: 1,
+  },
+  seeMoreButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  seeMoreText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    marginRight: 4,
   },
   scrollView: {
     paddingHorizontal: 20,

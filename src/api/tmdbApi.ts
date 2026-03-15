@@ -95,6 +95,66 @@ export const tmdbApi = {
       },
     }),
 
+  // Get thriller movies (genre id 53)
+  getThrillerMovies: () =>
+    api.get('/discover/movie', {
+      params: {
+        language: 'en-US',
+        with_genres: '53',
+        sort_by: 'popularity.desc',
+      },
+    }),
+
+  // Get horror movies (genre id 27)
+  getHorrorMovies: () =>
+    api.get('/discover/movie', {
+      params: {
+        language: 'en-US',
+        with_genres: '27',
+        sort_by: 'popularity.desc',
+      },
+    }),
+
+  // Get romance movies (genre id 10749)
+  getRomanceMovies: () =>
+    api.get('/discover/movie', {
+      params: {
+        language: 'en-US',
+        with_genres: '10749',
+        sort_by: 'popularity.desc',
+      },
+    }),
+
+  // Get adventure movies (genre id 12)
+  getAdventureMovies: () =>
+    api.get('/discover/movie', {
+      params: {
+        language: 'en-US',
+        with_genres: '12',
+        sort_by: 'popularity.desc',
+      },
+    }),
+
+  // Get fantasy movies (genre id 14)
+  getFantasyMovies: () =>
+    api.get('/discover/movie', {
+      params: {
+        language: 'en-US',
+        with_genres: '14',
+        sort_by: 'popularity.desc',
+      },
+    }),
+
+  // Get animation movies (genre id 16)
+  getAnimationMovies: () =>
+    api.get('/discover/movie', {
+      params: {
+        language: 'en-US',
+        with_genres: '16',
+        sort_by: 'popularity.desc',
+      },
+    }),
+
   // Get top-rated movies
   getTopRated: () =>
     api.get('/movie/top_rated', {
@@ -105,6 +165,107 @@ export const tmdbApi = {
   getPopular: () =>
     api.get('/movie/popular', {
       params: { language: 'en-US' },
+    }),
+
+  // Paginated genre functions
+  getTrendingWithPage: (page: number = 1) =>
+    api.get('/trending/movie/week', {
+      params: { language: 'en-US', page },
+    }),
+
+  getActionMoviesWithPage: (page: number = 1) =>
+    api.get('/discover/movie', {
+      params: {
+        language: 'en-US',
+        with_genres: '28',
+        sort_by: 'popularity.desc',
+        page,
+      },
+    }),
+
+  getComedyMoviesWithPage: (page: number = 1) =>
+    api.get('/discover/movie', {
+      params: {
+        language: 'en-US',
+        with_genres: '35',
+        sort_by: 'popularity.desc',
+        page,
+      },
+    }),
+
+  getDramaMoviesWithPage: (page: number = 1) =>
+    api.get('/discover/movie', {
+      params: {
+        language: 'en-US',
+        with_genres: '18',
+        sort_by: 'popularity.desc',
+        page,
+      },
+    }),
+
+  getThrillerMoviesWithPage: (page: number = 1) =>
+    api.get('/discover/movie', {
+      params: {
+        language: 'en-US',
+        with_genres: '53',
+        sort_by: 'popularity.desc',
+        page,
+      },
+    }),
+
+  getHorrorMoviesWithPage: (page: number = 1) =>
+    api.get('/discover/movie', {
+      params: {
+        language: 'en-US',
+        with_genres: '27',
+        sort_by: 'popularity.desc',
+        page,
+      },
+    }),
+
+  getRomanceMoviesWithPage: (page: number = 1) =>
+    api.get('/discover/movie', {
+      params: {
+        language: 'en-US',
+        with_genres: '10749',
+        sort_by: 'popularity.desc',
+        page,
+      },
+    }),
+
+  getAdventureMoviesWithPage: (page: number = 1) =>
+    api.get('/discover/movie', {
+      params: {
+        language: 'en-US',
+        with_genres: '12',
+        sort_by: 'popularity.desc',
+        page,
+      },
+    }),
+
+  getFantasyMoviesWithPage: (page: number = 1) =>
+    api.get('/discover/movie', {
+      params: {
+        language: 'en-US',
+        with_genres: '14',
+        sort_by: 'popularity.desc',
+        page,
+      },
+    }),
+
+  getAnimationMoviesWithPage: (page: number = 1) =>
+    api.get('/discover/movie', {
+      params: {
+        language: 'en-US',
+        with_genres: '16',
+        sort_by: 'popularity.desc',
+        page,
+      },
+    }),
+
+  getTopRatedWithPage: (page: number = 1) =>
+    api.get('/movie/top_rated', {
+      params: { language: 'en-US', page },
     }),
 }
 
