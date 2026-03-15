@@ -73,18 +73,18 @@ export default function MovieDetailScreen() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Poster with overlay */}
+      {/* Poster with overlay and info */}
       <View style={styles.posterContainer}>
         <ImageBackground
           source={{
             uri: getImageUrl(movie.poster_path || movie.backdrop_path, 500) ?? 'https://via.placeholder.com/500x300'
           }}
           style={styles.posterImage}
-          imageStyle={{ borderRadius: 0 }}
+          imageStyle={{ borderRadius: 0, resizeMode: 'cover' }}
         >
           <View style={styles.posterOverlay} />
           
-          {/* Header Buttons */}
+          {/* Header Buttons - Top */}
           <View style={styles.headerButtons}>
             <Pressable
               style={({ pressed }) => [styles.iconButton, pressed && styles.iconButtonPressed]}
@@ -98,38 +98,40 @@ export default function MovieDetailScreen() {
               <MoreVertical size={24} color="#fff" />
             </Pressable>
           </View>
+
+          {/* Movie Info - Positioned at bottom of poster */}
+          <View style={styles.posterInfoContainer}>
+            {/* Title */}
+            <Text style={styles.posterTitle}>{movie.title}</Text>
+
+            {/* Year, Rating, Duration Row */}
+            <View style={styles.posterMetaRow}>
+              <Text style={styles.posterYear}>{releaseYear}</Text>
+              <View style={styles.posterRatingRow}>
+                <Text style={styles.posterStarRating}>
+                  {Array(ratingStars).fill('★').join('')}
+                  {Array(5 - ratingStars).fill('☆').join('')}
+                </Text>
+              </View>
+              <Text style={styles.posterDuration}>{movie.runtime}min</Text>
+            </View>
+
+            {/* Genres */}
+            {movie.genres && movie.genres.length > 0 && (
+              <View style={styles.posterGenresRow}>
+                {movie.genres.slice(0, 2).map((genre: any) => (
+                  <Text key={genre.id} style={styles.posterGenreTag}>
+                    {genre.name}
+                  </Text>
+                ))}
+              </View>
+            )}
+          </View>
         </ImageBackground>
       </View>
 
-      {/* Movie Info Section */}
-      <View style={styles.infoSection}>
-        {/* Title */}
-        <Text style={styles.title}>{movie.title}</Text>
-
-        {/* Year, Rating, Duration Row */}
-        <View style={styles.metaRow}>
-          <Text style={styles.year}>{releaseYear}</Text>
-          <View style={styles.ratingRow}>
-            <Text style={styles.starRating}>
-              {Array(ratingStars).fill('★').join('')}
-              {Array(5 - ratingStars).fill('☆').join('')}
-            </Text>
-            <Text style={styles.ratingValue}>{movie.vote_average?.toFixed(1)}</Text>
-          </View>
-          <Text style={styles.duration}>{movie.runtime}min</Text>
-        </View>
-
-        {/* Genres */}
-        {movie.genres && movie.genres.length > 0 && (
-          <View style={styles.genresRow}>
-            {movie.genres.slice(0, 2).map((genre: any) => (
-              <Text key={genre.id} style={styles.genreTag}>
-                {genre.name}
-              </Text>
-            ))}
-          </View>
-        )}
-
+      {/* Action Buttons Section */}
+      <View style={styles.actionButtonsSection}>
         {/* Main Action Buttons */}
         <View style={styles.mainButtons}>
           <Pressable
@@ -172,41 +174,41 @@ export default function MovieDetailScreen() {
             <Text style={styles.actionButtonText}>Download</Text>
           </Pressable>
         </View>
-
-        {/* Storyline */}
-        <View style={styles.storylineSection}>
-          <Text style={styles.sectionTitle}>Storyline</Text>
-          <Text 
-            style={styles.overview}
-            numberOfLines={showFullOverview ? undefined : 4}
-          >
-            {movie.overview}
-          </Text>
-          {!showFullOverview && (
-            <Pressable onPress={() => setShowFullOverview(true)}>
-              <Text style={styles.readMore}>Read more ⌄</Text>
-            </Pressable>
-          )}
-        </View>
-
-        {/* More Like This */}
-        {similarMovies.length > 0 && (
-          <View style={styles.moreSection}>
-            <Text style={styles.sectionTitle}>More like this</Text>
-            <FlatList
-              data={similarMovies.slice(0, 10)}
-              renderItem={({ item }) => <MovieCard movie={item} width={110} height={165} />}
-              keyExtractor={(item) => item.id.toString()}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              scrollEventThrottle={16}
-              contentContainerStyle={styles.moviesScroll}
-            />
-          </View>
-        )}
-
-        <View style={{ height: 40 }} />
       </View>
+
+      {/* Storyline */}
+      <View style={styles.storylineSection}>
+        <Text style={styles.sectionTitle}>Storyline</Text>
+        <Text 
+          style={styles.overview}
+          numberOfLines={showFullOverview ? undefined : 4}
+        >
+          {movie.overview}
+        </Text>
+        {!showFullOverview && (
+          <Pressable onPress={() => setShowFullOverview(true)}>
+            <Text style={styles.readMore}>Read more ⌄</Text>
+          </Pressable>
+        )}
+      </View>
+
+      {/* More Like This */}
+      {similarMovies.length > 0 && (
+        <View style={styles.moreSection}>
+          <Text style={styles.sectionTitle}>More like this</Text>
+          <FlatList
+            data={similarMovies.slice(0, 10)}
+            renderItem={({ item }) => <MovieCard movie={item} width={110} height={165} />}
+            keyExtractor={(item) => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            scrollEventThrottle={16}
+            contentContainerStyle={styles.moviesScroll}
+          />
+        </View>
+      )}
+
+      <View style={{ height: 40 }} />
     </ScrollView>
   )
 }
@@ -217,15 +219,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#0a0a15',
   },
   posterContainer: {
-    height: 400,
+    height: 520,
     width: '100%',
+    backgroundColor: '#000',
+    overflow: 'hidden',
   },
   posterImage: {
     flex: 1,
-    justifyContent: 'space-between',
-    paddingTop: 20,
-    paddingHorizontal: 16,
-    paddingBottom: 20,
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+    paddingTop: 50,
+    paddingBottom: 0,
+    width: '100%',
+    height: '100%',
   },
   posterOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -234,6 +240,12 @@ const styles = StyleSheet.create({
   headerButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    zIndex: 10,
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    right: 0,
   },
   iconButton: {
     width: 44,
@@ -245,6 +257,63 @@ const styles = StyleSheet.create({
   },
   iconButtonPressed: {
     opacity: 0.7,
+  },
+  posterInfoContainer: {
+    zIndex: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 12,
+    marginHorizontal: 16,
+    marginBottom: 6,
+  },
+  posterTitle: {
+    color: '#fff',
+    fontSize: 26,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  posterMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 8,
+  },
+  posterYear: {
+    color: '#ccc',
+    fontSize: 14,
+  },
+  posterRatingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  posterStarRating: {
+    color: '#ffd700',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  posterDuration: {
+    color: '#ccc',
+    fontSize: 14,
+  },
+  posterGenresRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  posterGenreTag: {
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    color: '#ccc',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  actionButtonsSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#0a0a15',
   },
   infoSection: {
     paddingHorizontal: 16,
@@ -291,12 +360,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   genreTag: {
-    backgroundColor: '#0f2438',
+    backgroundColor: '#0a0f15',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#1a3a52',
+    borderColor: '#333333',
   },
   genreText: {
     color: '#ccc',
@@ -306,7 +375,7 @@ const styles = StyleSheet.create({
   mainButtons: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 12,
+    marginBottom: 8,
   },
   trailerButton: {
     flex: 1,
@@ -344,7 +413,7 @@ const styles = StyleSheet.create({
   secondaryButtons: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 24,
+    marginBottom: 12,
   },
   actionButton: {
     flex: 1,
@@ -368,6 +437,8 @@ const styles = StyleSheet.create({
   },
   storylineSection: {
     marginBottom: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
   },
   sectionTitle: {
     color: '#fff',
@@ -388,6 +459,8 @@ const styles = StyleSheet.create({
   },
   moreSection: {
     marginBottom: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
   },
   moviesScroll: {
     gap: 8,
