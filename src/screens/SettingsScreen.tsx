@@ -30,7 +30,7 @@ export default function SettingsScreen() {
           <View style={styles.divider} />
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Version</Text>
-            <Text style={styles.infoValue}>1.0.0</Text>
+            <Text style={styles.infoValue}>2.0.4</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.infoRow}>
@@ -106,9 +106,12 @@ export default function SettingsScreen() {
       {/* Footer */}
       <View style={styles.footer}>
         <Text style={styles.footerText}>
-          Draflix • Made with ❤️ by Mobile Developers
+          This mobile app developed by Malinda Prabath
         </Text>
-        <Text style={styles.footerVersion}>Version 1.0.0 • 2026</Text>
+        <Text style={styles.footerSubtext}>
+          Using VS Code (GitHub Copilot) • 2026
+        </Text>
+        <Text style={styles.footerVersion}>Version 2.0.4</Text>
       </View>
     </ScrollView>
   )
@@ -122,6 +125,7 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 16,
     paddingVertical: 16,
+    paddingTop: 40,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 0, 0, 0.1)',
   },
@@ -258,11 +262,18 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: '#999',
+    color: '#ccc',
     marginBottom: 4,
+    fontWeight: '500',
+  },
+  footerSubtext: {
+    fontSize: 12,
+    color: '#999',
+    marginBottom: 12,
   },
   footerVersion: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#666',
+    marginTop: 8,
   },
 })

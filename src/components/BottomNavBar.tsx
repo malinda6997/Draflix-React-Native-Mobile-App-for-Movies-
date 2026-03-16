@@ -95,17 +95,19 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     backgroundColor: 'transparent',
+    paddingTop: 0,
   },
   navContent: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 1,
+    paddingBottom: 4,
   },
   navItem: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
+    paddingVertical: 1,
     paddingHorizontal: 12,
   },
   navItemActive: {
@@ -116,21 +118,21 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   iconWrapper: {
-    width: 40,
-    height: 40,
+    width: 32,
+    height: 32,
     alignItems: 'center',
     justifyContent: 'center',
   },
   navLabel: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '500',
-    marginTop: 4,
+    marginTop: 2,
   },
   activeIndicator: {
     width: 4,
     height: 2,
     borderRadius: 1,
     backgroundColor: '#FF0000',
-    marginTop: 4,
+    marginTop: 2,
   },
 })
