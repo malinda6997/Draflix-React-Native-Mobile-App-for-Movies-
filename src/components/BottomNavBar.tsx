@@ -21,7 +21,16 @@ export default function BottomNavBar() {
 
   const handleNavigate = (screen: string) => {
     setActiveTab(screen)
-    navigation.navigate(screen as never)
+    try {
+      // Use jumpTo for tab navigation which is more reliable
+      if (navigation.jumpTo) {
+        navigation.jumpTo(screen)
+      } else {
+        navigation.navigate(screen as never)
+      }
+    } catch (error) {
+      console.log('Navigation error:', error)
+    }
   }
 
   const navItems = [
