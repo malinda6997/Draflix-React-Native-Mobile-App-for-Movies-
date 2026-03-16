@@ -9,13 +9,15 @@ import {
 } from 'react-native'
 import { Image } from 'expo-image'
 import { tmdbApi } from '@/src/api/tmdbApi'
-import { Star } from 'lucide-react-native'
+import { Star, BookmarkCheck } from 'lucide-react-native'
+import { useWatchlist } from '@/src/hooks/useWatchlist'
 
 const POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500'
 
 export default function TrailerScreen() {
   const [tvSeries, setTvSeries] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const { isInWatchlist, toggleWatchlist } = useWatchlist()
 
   useEffect(() => {
     const loadTVSeries = async () => {
@@ -40,6 +42,7 @@ export default function TrailerScreen() {
       : 'https://via.placeholder.com/500x750'
     
     const rating = item.vote_average ? item.vote_average.toFixed(1) : 'N/A'
+    const isSaved = isInWatchlist(item.id)
 
     return (
       <Pressable style={styles.seriesContainer}>
@@ -53,6 +56,16 @@ export default function TrailerScreen() {
             <Star size={14} color="#FFD700" fill="#FFD700" />
             <Text style={styles.ratingText}>{rating}</Text>
           </View>
+          <Pressable 
+            style={[styles.saveButton, isSaved && styles.savButtonActive]}
+            onPress={() => toggleWatchlist(item.id)}
+          >
+            <BookmarkCheck 
+              size={20} 
+              color={isSaved ? '#00D9FF' : '#fff'} 
+              fill={isSaved ? '#00D9FF' : 'none'}
+            />
+          </Pressable>
         </View>
         <Text style={styles.title} numberOfLines={2}>
           {item.name || item.title}
@@ -179,5 +192,19 @@ const styles = StyleSheet.create({
   year: {
     fontSize: 12,
     color: '#999',
+  },
+  saveButton: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    width: 40,
+    height: 40,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  savButtonActive: {
+    backgroundColor: 'rgba(0, 217, 255, 0.2)',
   },
 })

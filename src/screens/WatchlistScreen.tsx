@@ -1,139 +1,190 @@
-import { MovieCard } from '@/src/components/MovieCard'
 import { useWatchlist } from '@/src/hooks/useWatchlist'
 import { useFocusEffect } from '@react-navigation/native'
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import {
   FlatList,
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
+  ActivityIndicator,
 } from 'react-native'
+import { Image } from 'expo-image'
+import { BookmarkCheck } from 'lucide-react-native'
 
-// Mock movie data - in real app, fetch from API
-const MOCK_MOVIES: { [key: number]: any } = {
-  550: {
-    id: 550,
-    title: 'Fight Club',
-    poster_path: '/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg',
-    vote_average: 8.8,
-  },
-  278: {
-    id: 278,
-    title: 'The Shawshank Redemption',
-    poster_path: '/q6y0Go1tsGEsmJy/cbB2eWhw5h3.jpg',
-    vote_average: 9.3,
-  },
-  238: {
-    id: 238,
-    title: 'The Godfather',
-    poster_path: '/3bhkrj58Vtu7enYsRolD1fZdja1.jpg',
-    vote_average: 9.2,
-  },
-}
+const POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500'
 
 export default function WatchlistScreen() {
   const { watchlist } = useWatchlist()
+  const [savedItems, setSavedItems] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
 
   useFocusEffect(
     useCallback(() => {
-      // Refetch watchlist on focus
+      // Refetch saved items on focus
     }, [])
   )
 
-  const moviesData = watchlist
-    .map((id) => MOCK_MOVIES[id])
-    .filter((movie) => movie !== undefined)
-
-  const renderMovieGrid = () => {
-    if (moviesData.length === 0) {
-      return (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyTitle}>Your Watchlist is Empty</Text>
-          <Text style={styles.emptyDescription}>
-            Add movies from the Home or Search screen
-          </Text>
-        </View>
-      )
-    }
+  const renderSavedItem = ({ item }: { item: any }) => {
+    const posterUrl = item.poster_path
+      ? `${POSTER_BASE_URL}${item.poster_path}`
+      : 'https://via.placeholder.com/500x750'
 
     return (
-      <FlatList
-        data={moviesData}
-        renderItem={({ item }) => <MovieCard movie={item} width={160} height={240} />}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={2}
-        columnWrapperStyle={styles.gridRow}
-        scrollEnabled={false}
-        contentContainerStyle={styles.gridContainer}
-      />
+      <View style={styles.itemContainer}>
+        <View style={styles.posterWrapper}>
+          <Image
+            source={{ uri: posterUrl }}
+            style={styles.poster}
+            contentFit="cover"
+          />
+          <View style={styles.savedBadge}>
+            <BookmarkCheck size={16} color="#00D9FF" fill="#00D9FF" />
+          </View>
+        </View>
+        <Text style={styles.title} numberOfLines={2}>
+          {item.name || item.title}
+        </Text>
+        <Text style={styles.year}>
+          {(item.first_air_date || item.release_date)?.split('-')[0] || 'N/A'}
+        </Text>
+      </View>
+    )
+  }
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Saved Shows</Text>
+        </View>
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#00D9FF" />
+        </View>
+      </View>
+    )
+  }
+
+  if (savedItems.length === 0) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Saved Shows</Text>
+        </View>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyTitle}>No Saved Shows Yet</Text>
+          <Text style={styles.emptyDescription}>
+            Save your favorite TV shows to view them here
+          </Text>
+        </View>
+      </View>
     )
   }
 
   return (
-    <SafeAreaView style={styles.safeContainer}>
-      <View style={styles.container}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.title}>My Watchlist</Text>
-          {moviesData.length > 0 && (
-            <Text style={styles.count}>{moviesData.length} movies</Text>
-          )}
-        </View>
-
-        {renderMovieGrid()}
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Saved Shows</Text>
+        <Text style={styles.count}>{watchlist.length} shows</Text>
       </View>
-    </SafeAreaView>
+
+      <FlatList
+        data={savedItems}
+        renderItem={renderSavedItem}
+        keyExtractor={(item) => item.id.toString()}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+      />
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
-  safeContainer: {
-    flex: 1,
-    backgroundColor: '#0a0a15',
-  },
   container: {
     flex: 1,
-    backgroundColor: '#0a0a15',
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    backgroundColor: '#0f0f1e',
   },
-  headerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
+  header: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 217, 255, 0.1)',
   },
-  title: {
-    color: '#fff',
-    fontSize: 28,
+  headerTitle: {
+    fontSize: 24,
     fontWeight: '700',
+    color: '#fff',
   },
   count: {
-    color: '#0a7ea4',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 12,
+    color: '#999',
+    marginTop: 4,
   },
-  gridContainer: {
-    paddingBottom: 20,
-  },
-  gridRow: {
-    justifyContent: 'space-between',
-    marginBottom: 16,
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 12,
   },
   emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
     color: '#fff',
-    fontSize: 20,
-    fontWeight: '700',
+    marginBottom: 8,
   },
   emptyDescription: {
-    color: '#666',
     fontSize: 14,
+    color: '#999',
     textAlign: 'center',
+  },
+  row: {
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+    marginBottom: 12,
+  },
+  listContent: {
+    paddingHorizontal: 8,
+    paddingVertical: 12,
+  },
+  itemContainer: {
+    flex: 1,
+    marginHorizontal: 4,
+  },
+  posterWrapper: {
+    position: 'relative',
+    marginBottom: 8,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#1a1a2e',
+  },
+  poster: {
+    width: '100%',
+    height: 220,
+  },
+  savedBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 32,
+    height: 32,
+    backgroundColor: 'rgba(0, 217, 255, 0.2)',
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#fff',
+    marginBottom: 2,
+  },
+  year: {
+    fontSize: 12,
+    color: '#999',
   },
 })
