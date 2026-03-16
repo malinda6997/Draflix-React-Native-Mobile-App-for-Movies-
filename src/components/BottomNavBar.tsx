@@ -35,7 +35,7 @@ export default function BottomNavBar() {
 
   const navItems = [
     { label: 'Home', icon: Home, screen: 'index' },
-    { label: 'Trailer', icon: Film, screen: 'trailer' },
+    { label: 'TV Series', icon: Film, screen: 'trailer' },
     { label: 'Saved', icon: BookmarkCheck, screen: 'watchlist' },
     { label: 'Download', icon: Download, screen: 'profile' },
   ]

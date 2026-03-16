@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   FlatList,
   Pressable,
@@ -7,111 +7,59 @@ import {
   Text,
   View,
   ActivityIndicator,
-  Alert,
 } from 'react-native'
 import { Image } from 'expo-image'
-import * as WebBrowser from 'expo-web-browser'
 import { tmdbApi } from '@/src/api/tmdbApi'
-import { Play } from 'lucide-react-native'
+import { Star } from 'lucide-react-native'
 
 const POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500'
 
-export default function TrailerScreen() {
-  const [movies, setMovies] = useState<any[]>([])
-  const [trailers, setTrailers] = useState<{ [key: number]: any }>({})
+export default function TVSeriesScreen() {
+  const [tvSeries, setTvSeries] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
-  const loadMoviesAndTrailers = useCallback(async () => {
-    try {
-      setLoading(true)
-      // Get trending movies
-      const moviesResponse = await tmdbApi.getTrending()
-      const moviesList = moviesResponse.data.results?.slice(0, 12) || []
-      setMovies(moviesList)
-
-      // Fetch trailers for each movie
-      const trailersData: { [key: number]: any } = {}
-      for (const movie of moviesList.slice(0, 6)) {
-        try {
-          const videosResponse = await tmdbApi.getMovieVideos(movie.id)
-          const trailerVideo = videosResponse.data.results?.find(
-            (v: any) => v.type === 'Trailer' && v.site === 'YouTube'
-          )
-          if (trailerVideo) {
-            trailersData[movie.id] = trailerVideo
-          }
-        } catch {
-          console.log(`Error fetching trailer for movie ${movie.id}`)
-        }
+  useEffect(() => {
+    const loadTVSeries = async () => {
+      try {
+        setLoading(true)
+        const response = await tmdbApi.getTrending()
+        const seriesList = response.data.results?.slice(0, 12) || []
+        setTvSeries(seriesList)
+      } catch (error) {
+        console.log('Error loading TV series:', error)
+      } finally {
+        setLoading(false)
       }
-      setTrailers(trailersData)
-    } catch {
-      console.error('Error loading movies')
-      Alert.alert('Error', 'Failed to load trailers')
-    } finally {
-      setLoading(false)
     }
+    
+    loadTVSeries()
   }, [])
 
-  useEffect(() => {
-    loadMoviesAndTrailers()
-  }, [loadMoviesAndTrailers])
-
-  const handleWatchTrailer = async (movieId: number, movieTitle: string) => {
-    const trailer = trailers[movieId]
-    if (trailer?.key) {
-      try {
-        await WebBrowser.openBrowserAsync(
-          `https://www.youtube.com/watch?v=${trailer.key}`
-        )
-      } catch {
-        Alert.alert('Error', 'Unable to open trailer')
-      }
-    } else {
-      Alert.alert('Not Available', `Trailer for "${movieTitle}" is not available`)
-    }
-  }
-
-  const renderTrailerCard = ({ item }: { item: any }) => {
-    const hasTrailer = trailers[item.id]
+  const renderSeries = ({ item }: { item: any }) => {
     const posterUrl = item.poster_path
       ? `${POSTER_BASE_URL}${item.poster_path}`
-      : 'https://via.placeholder.com/300x450?text=No+Image'
+      : 'https://via.placeholder.com/500x750'
+    
+    const rating = item.vote_average ? item.vote_average.toFixed(1) : 'N/A'
 
     return (
-      <Pressable
-        onPress={() => handleWatchTrailer(item.id, item.title)}
-        style={styles.trailerCard}
-      >
-        <View style={styles.posterContainer}>
+      <Pressable style={styles.seriesContainer}>
+        <View style={styles.posterWrapper}>
           <Image
-            source={posterUrl}
+            source={{ uri: posterUrl }}
             style={styles.poster}
             contentFit="cover"
           />
-          <View
-            style={[
-              styles.playButtonOverlay,
-              { backgroundColor: hasTrailer ? 'rgba(0, 217, 255, 0.9)' : 'rgba(100, 100, 100, 0.7)' },
-            ]}
-          >
-            <Play
-              size={40}
-              color="#fff"
-              fill="#fff"
-            />
+          <View style={styles.ratingBadge}>
+            <Star size={14} color="#FFD700" fill="#FFD700" />
+            <Text style={styles.ratingText}>{rating}</Text>
           </View>
-          {!hasTrailer && (
-            <View style={styles.notAvailableOverlay}>
-              <Text style={styles.notAvailableText}>Not Available</Text>
-            </View>
-          )}
         </View>
-        <Text style={styles.movieTitle} numberOfLines={2}>
-          {item.title}
+        <Text style={styles.title} numberOfLines={2}>
+          {item.name || item.title}
         </Text>
-        <Text style={styles.movieYear}>
-          {new Date(item.release_date).getFullYear()}
+        <Text style={styles.year}>
+          {(item.first_air_date || item.release_date)?.split('-')[0] || 'N/A'}
         </Text>
       </Pressable>
     )
@@ -120,8 +68,12 @@ export default function TrailerScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.centerContainer}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>TV Series</Text>
+        </View>
+        <View style={styles.loaderContainer}>
           <ActivityIndicator size="large" color="#00D9FF" />
+          <Text style={styles.loadingText}>Loading TV series...</Text>
         </View>
       </SafeAreaView>
     )
@@ -130,17 +82,17 @@ export default function TrailerScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Trailers</Text>
-        <Text style={styles.subtitle}>Watch movie trailers</Text>
+        <Text style={styles.headerTitle}>TV Series</Text>
+        <Text style={styles.subtitle}>Popular shows</Text>
       </View>
 
       <FlatList
-        data={movies}
-        renderItem={renderTrailerCard}
+        data={tvSeries}
+        renderItem={renderSeries}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
-        columnWrapperStyle={styles.gridRow}
-        contentContainerStyle={styles.gridContent}
+        columnWrapperStyle={styles.row}
+        contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
@@ -152,83 +104,80 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0f0f1e',
   },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   header: {
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 217, 255, 0.1)',
   },
-  title: {
+  headerTitle: {
     fontSize: 24,
     fontWeight: '700',
     color: '#fff',
-    marginBottom: 4,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#999',
+    marginTop: 2,
   },
-  gridRow: {
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: '#999',
+    marginTop: 12,
+    fontSize: 14,
+  },
+  row: {
     justifyContent: 'space-between',
-    paddingHorizontal: 12,
-    marginBottom: 16,
+    paddingHorizontal: 8,
+    marginBottom: 12,
   },
-  gridContent: {
-    paddingTop: 16,
-    paddingBottom: 20,
+  listContent: {
+    paddingHorizontal: 8,
+    paddingVertical: 12,
   },
-  trailerCard: {
+  seriesContainer: {
     flex: 1,
     marginHorizontal: 4,
   },
-  posterContainer: {
+  posterWrapper: {
     position: 'relative',
-    marginBottom: 12,
-    borderRadius: 12,
+    marginBottom: 8,
+    borderRadius: 8,
     overflow: 'hidden',
+    backgroundColor: '#1a1a2e',
   },
   poster: {
     width: '100%',
-    height: 240,
-    borderRadius: 12,
+    height: 220,
   },
-  playButtonOverlay: {
+  ratingBadge: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    flexDirection: 'row',
     alignItems: 'center',
-    opacity: 0.8,
+    gap: 4,
   },
-  notAvailableOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  notAvailableText: {
-    color: '#999',
+  ratingText: {
+    color: '#FFD700',
     fontSize: 12,
     fontWeight: '600',
   },
-  movieTitle: {
-    fontSize: 14,
-    fontWeight: '600',
+  title: {
+    fontSize: 13,
+    fontWeight: '500',
     color: '#fff',
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  movieYear: {
+  year: {
     fontSize: 12,
     color: '#999',
   },
