@@ -1,12 +1,11 @@
 import { useWatchlist } from '@/src/hooks/useWatchlist'
-import React, { useCallback, useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   FlatList,
   StyleSheet,
   Text,
   View,
   ActivityIndicator,
-  Alert,
 } from 'react-native'
 import { Image } from 'expo-image'
 import { BookmarkCheck } from 'lucide-react-native'
@@ -20,29 +19,29 @@ export default function WatchlistScreen() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const loadSavedShows = async () => {
+      try {
+        setLoading(true)
+        
+        if (!watchlist || watchlist.length === 0) {
+          setSavedItems([])
+          setLoading(false)
+          return
+        }
+
+        const response = await tmdbApi.getTrending()
+        const allShows = response.data.results || []
+        const saved = allShows.filter(show => watchlist.includes(show.id))
+        setSavedItems(saved)
+      } catch (error) {
+        console.log('Error loading saved shows:', error)
+        setSavedItems([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    
     loadSavedShows()
-  }, [watchlist])
-
-  const loadSavedShows = useCallback(async () => {
-    if (watchlist.length === 0) {
-      setSavedItems([])
-      setLoading(false)
-      return
-    }
-
-    try {
-      setLoading(true)
-      const response = await tmdbApi.getTrending()
-      const allShows = response.data.results || []
-      
-      // Filter to only show saved items
-      const saved = allShows.filter(show => watchlist.includes(show.id))
-      setSavedItems(saved)
-    } catch (error) {
-      console.log('Error loading saved shows:', error)
-    } finally {
-      setLoading(false)
-    }
   }, [watchlist])
 
   const renderSavedItem = ({ item }: { item: any }) => {
