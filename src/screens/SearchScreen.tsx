@@ -25,6 +25,14 @@ export default function SearchScreen() {
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
 
+  // Create panResponder with updated state using useRef
+  const searchedRef = useRef(searched)
+  
+  // Update ref whenever searched state changes
+  useEffect(() => {
+    searchedRef.current = searched
+  }, [searched])
+
   // Gesture handler for right swipe
   const panResponder = useRef(
     PanResponder.create({
@@ -37,14 +45,18 @@ export default function SearchScreen() {
         // Check if swiping right (positive dx > 50)
         if (gestureState.dx > 50) {
           // Trigger back navigation - go to home
-          if (searched) {
+          if (searchedRef.current) {
             // If in search results, clear search first
             setSearchQuery('')
             setSearchResults([])
             setSearched(false)
           } else {
-            // If in initial screen, replace with home tab
-            navigation.navigate('index' as never)
+            // If in initial screen, go to home tab
+            try {
+              navigation.navigate('index' as never)
+            } catch (e) {
+              console.log('Navigation error:', e)
+            }
           }
         }
       },
