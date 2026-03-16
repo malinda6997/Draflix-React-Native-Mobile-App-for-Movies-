@@ -1,20 +1,45 @@
 import { tmdbApi } from '@/src/api/tmdbApi'
 import { MovieCard } from '@/src/components/MovieCard'
-import React, { useState } from 'react'
+import { useRouter } from 'expo-router'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   FlatList,
+  Pressable,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native'
+import { ChevronLeft, Search, X } from 'lucide-react-native'
 
 export default function SearchScreen() {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
+  const [recentSearches, setRecentSearches] = useState<string[]>(['Interstellar', 'The Jungle', 'Wedding 99'])
+  const [trendingMovies, setTrendingMovies] = useState<any[]>([])
+  const [continueWatching, setContinueWatching] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
+
+  const loadInitialData = useCallback(async () => {
+    try {
+      const [trending, topRated] = await Promise.all([
+        tmdbApi.getTrending(),
+        tmdbApi.getTopRated(),
+      ])
+      setTrendingMovies(trending.data.results?.slice(0, 10) || [])
+      setContinueWatching(topRated.data.results?.slice(0, 5) || [])
+    } catch (error) {
+      console.error('Error loading initial data:', error)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadInitialData()
+  }, [loadInitialData])
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query)
@@ -30,6 +55,11 @@ export default function SearchScreen() {
       setSearched(true)
       const response = await tmdbApi.searchMovies(query)
       setSearchResults(response.data.results || [])
+      
+      // Add to recent searches
+      if (!recentSearches.includes(query)) {
+        setRecentSearches([query, ...recentSearches.slice(0, 4)])
+      }
     } catch (error) {
       console.error('Search error:', error)
       setSearchResults([])
@@ -38,46 +68,70 @@ export default function SearchScreen() {
     }
   }
 
+  const handleRecentSearchClick = (query: string) => {
+    handleSearch(query)
+  }
+
+  const clearSearch = () => {
+    setSearchQuery('')
+    setSearchResults([])
+    setSearched(false)
+  }
+
   const renderMovieGrid = () => {
     return (
       <FlatList
         data={searchResults}
-        renderItem={({ item }) => <MovieCard movie={item} width={160} height={240} />}
+        renderItem={({ item }) => <MovieCard movie={item} width={150} height={225} />}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
         columnWrapperStyle={styles.gridRow}
         scrollEnabled={false}
-        contentContainerStyle={styles.gridContainer}
+        contentContainerStyle={styles.gridContent}
       />
     )
   }
 
-  return (
-    <SafeAreaView style={styles.safeContainer}>
-      <View style={styles.container}>
-        {/* Search Bar */}
-        <View style={styles.searchBarContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search movies..."
-            placeholderTextColor="#666"
-            value={searchQuery}
-            onChangeText={handleSearch}
-          />
-        </View>
+  if (searched) {
+    return (
+      <SafeAreaView style={styles.safeContainer}>
+        <View style={styles.container}>
+          {/* Search Bar */}
+          <View style={styles.searchBarContainer}>
+            <Pressable onPress={() => router.back()} style={styles.backButton}>
+              <ChevronLeft size={24} color="#fff" />
+            </Pressable>
+            <View style={styles.searchInputWrapper}>
+              <Search size={18} color="#999" />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search"
+                placeholderTextColor="#666"
+                value={searchQuery}
+                onChangeText={handleSearch}
+                autoFocus
+              />
+              {searchQuery.length > 0 && (
+                <Pressable onPress={clearSearch}>
+                  <X size={18} color="#999" />
+                </Pressable>
+              )}
+            </View>
+          </View>
 
-        {/* Results Section */}
-        {searched ? (
-          <View style={styles.resultsContainer}>
+          {/* Results */}
+          <ScrollView showsVerticalScrollIndicator={false}>
             {loading ? (
-              <Text style={styles.loadingText}>Searching...</Text>
+              <View style={styles.loadingContainer}>
+                <Text style={styles.loadingText}>Searching...</Text>
+              </View>
             ) : searchResults.length > 0 ? (
-              <>
-                <Text style={styles.resultsTitle}>
-                  Found {searchResults.length} movies
+              <View style={styles.resultsSection}>
+                <Text style={styles.sectionTitle}>
+                  {searchResults.length} {searchResults.length === 1 ? 'Result' : 'Results'}
                 </Text>
                 {renderMovieGrid()}
-              </>
+              </View>
             ) : (
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyTitle}>No movies found</Text>
@@ -86,16 +140,88 @@ export default function SearchScreen() {
                 </Text>
               </View>
             )}
+          </ScrollView>
+        </View>
+      </SafeAreaView>
+    )
+  }
+
+  // Initial search screen with recent searches and recommendations
+  return (
+    <SafeAreaView style={styles.safeContainer}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        {/* Search Bar */}
+        <View style={styles.searchBarContainer}>
+          <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <ChevronLeft size={24} color="#fff" />
+          </Pressable>
+          <View style={styles.searchInputWrapper}>
+            <Search size={18} color="#999" />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search"
+              placeholderTextColor="#666"
+              value={searchQuery}
+              onChangeText={handleSearch}
+              autoFocus
+            />
           </View>
-        ) : (
-          <View style={styles.placeholderContainer}>
-            <Text style={styles.placeholderTitle}>Search Movies</Text>
-            <Text style={styles.placeholderDescription}>
-              Type a movie name to find it
-            </Text>
+        </View>
+
+        {/* Recent Searches */}
+        <View style={styles.recentSection}>
+          <View style={styles.recentHeader}>
+            <Text style={styles.recentTitle}>Recent Search</Text>
+            <Pressable onPress={() => setRecentSearches([])}>
+              <Text style={styles.removeText}>Remove</Text>
+            </Pressable>
           </View>
-        )}
-      </View>
+          <View style={styles.recentTagsContainer}>
+            {recentSearches.map((search) => (
+              <Pressable
+                key={search}
+                style={styles.recentTag}
+                onPress={() => handleRecentSearchClick(search)}
+              >
+                <Text style={styles.recentTagText}>{search}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+        {/* For You Section */}
+        <View style={styles.forYouSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>For you</Text>
+            <Pressable>
+              <Text style={styles.seeAllText}>See all</Text>
+            </Pressable>
+          </View>
+          <FlatList
+            data={trendingMovies.slice(0, 6)}
+            renderItem={({ item }) => <MovieCard movie={item} width={160} height={240} />}
+            keyExtractor={(item) => item.id.toString()}
+            numColumns={2}
+            columnWrapperStyle={styles.gridRow}
+            scrollEnabled={false}
+            contentContainerStyle={styles.gridContent}
+          />
+        </View>
+
+        {/* Continue Watching */}
+        <View style={styles.continueSection}>
+          <Text style={styles.sectionTitle}>Continue watching</Text>
+          <FlatList
+            data={continueWatching}
+            renderItem={({ item }) => <MovieCard movie={item} width={160} height={240} />}
+            keyExtractor={(item) => item.id.toString()}
+            numColumns={2}
+            columnWrapperStyle={styles.gridRow}
+            scrollEnabled={false}
+            contentContainerStyle={styles.gridContent}
+          />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   )
 }
@@ -108,25 +234,134 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0a0a15',
-    paddingTop: 20,
   },
   searchBarContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    gap: 10,
+  },
+  backButton: {
+    padding: 8,
+  },
+  searchInputWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1a1a2e',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 44,
+    gap: 10,
+    borderWidth: 1,
+    borderColor: '#2a2a3e',
   },
   searchInput: {
-    backgroundColor: '#1a1a1a',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    flex: 1,
     color: '#fff',
     fontSize: 14,
-    borderWidth: 1,
-    borderColor: '#333',
   },
-  resultsContainer: {
+  
+  // Recent Searches
+  recentSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1a1a2e',
+  },
+  recentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  recentTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  removeText: {
+    color: '#0a7ea4',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  recentTagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  recentTag: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: '#1a1a2e',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#2a2a3e',
+  },
+  recentTagText: {
+    color: '#ccc',
+    fontSize: 13,
+  },
+
+  // For You Section
+  forYouSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1a1a2e',
+  },
+
+  // Continue Watching Section
+  continueSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+  },
+
+  // Section Headers
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  seeAllText: {
+    color: '#0a7ea4',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+
+  // Grid Layout
+  gridRow: {
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  gridContent: {
+    paddingBottom: 20,
+  },
+  gridContainer: {
+    paddingBottom: 20,
+  },
+
+  // Loading & Empty States
+  loadingContainer: {
     flex: 1,
-    paddingHorizontal: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    color: '#666',
+    fontSize: 14,
+  },
+  resultsSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 20,
   },
   resultsTitle: {
     color: '#fff',
@@ -134,23 +369,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 12,
   },
-  gridContainer: {
-    paddingBottom: 20,
-  },
-  gridRow: {
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  loadingText: {
-    color: '#666',
-    fontSize: 14,
-    textAlign: 'center',
-    marginTop: 20,
-  },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 60,
     gap: 8,
   },
   emptyTitle: {
@@ -159,21 +382,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   emptyDescription: {
-    color: '#666',
-    fontSize: 14,
-  },
-  placeholderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-  },
-  placeholderTitle: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  placeholderDescription: {
     color: '#666',
     fontSize: 14,
   },
