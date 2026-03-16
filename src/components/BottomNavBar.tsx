@@ -1,15 +1,35 @@
-import React from 'react'
-import { View, Pressable, StyleSheet, SafeAreaView } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
+import React, { useState } from 'react'
+import { View, Pressable, StyleSheet, SafeAreaView, Text } from 'react-native'
+import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native'
 import { Home, Film, BookmarkCheck, Download } from 'lucide-react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 
 export default function BottomNavBar() {
   const navigation = useNavigation<any>()
+  const route = useRoute()
+  const [activeTab, setActiveTab] = useState('index')
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (route.name === 'index') setActiveTab('index')
+      else if (route.name === 'search') setActiveTab('search')
+      else if (route.name === 'trailer') setActiveTab('trailer')
+      else if (route.name === 'watchlist') setActiveTab('watchlist')
+      else if (route.name === 'profile') setActiveTab('profile')
+    }, [route.name])
+  )
 
   const handleNavigate = (screen: string) => {
+    setActiveTab(screen)
     navigation.navigate(screen as never)
   }
+
+  const navItems = [
+    { label: 'Home', icon: Home, screen: 'index' },
+    { label: 'Trailer', icon: Film, screen: 'trailer' },
+    { label: 'Saved', icon: BookmarkCheck, screen: 'watchlist' },
+    { label: 'Download', icon: Download, screen: 'profile' },
+  ]
 
   return (
     <LinearGradient
@@ -20,49 +40,39 @@ export default function BottomNavBar() {
     >
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.navContent}>
-          {/* Home */}
-          <Pressable
-            style={({ pressed }) => [styles.navItem, pressed && styles.navItemPressed]}
-            onPress={() => handleNavigate('index')}
-          >
-            <View style={styles.iconWrapper}>
-              <Home size={24} color="#00D9FF" strokeWidth={2} />
-            </View>
-            <View style={styles.activeIndicator} />
-          </Pressable>
+          {navItems.map((item) => {
+            const isActive = activeTab === item.screen
+            const Icon = item.icon
 
-          {/* Trailer */}
-          <Pressable
-            style={({ pressed }) => [styles.navItem, pressed && styles.navItemPressed]}
-            onPress={() => handleNavigate('trailer')}
-          >
-            <View style={styles.iconWrapper}>
-              <Film size={24} color="#00D9FF" strokeWidth={2} />
-            </View>
-            <View style={styles.activeIndicator} />
-          </Pressable>
-
-          {/* Saved */}
-          <Pressable
-            style={({ pressed }) => [styles.navItem, pressed && styles.navItemPressed]}
-            onPress={() => handleNavigate('watchlist')}
-          >
-            <View style={styles.iconWrapper}>
-              <BookmarkCheck size={24} color="#00D9FF" strokeWidth={2} />
-            </View>
-            <View style={styles.activeIndicator} />
-          </Pressable>
-
-          {/* Download */}
-          <Pressable
-            style={({ pressed }) => [styles.navItem, pressed && styles.navItemPressed]}
-            onPress={() => handleNavigate('profile')}
-          >
-            <View style={styles.iconWrapper}>
-              <Download size={24} color="#00D9FF" strokeWidth={2} />
-            </View>
-            <View style={styles.activeIndicator} />
-          </Pressable>
+            return (
+              <Pressable
+                key={item.screen}
+                style={({ pressed }) => [
+                  styles.navItem,
+                  pressed && styles.navItemPressed,
+                  isActive && styles.navItemActive,
+                ]}
+                onPress={() => handleNavigate(item.screen)}
+              >
+                <View style={styles.iconWrapper}>
+                  <Icon
+                    size={24}
+                    color={isActive ? '#00D9FF' : '#666'}
+                    strokeWidth={2}
+                  />
+                </View>
+                <Text
+                  style={[
+                    styles.navLabel,
+                    { color: isActive ? '#00D9FF' : '#666' },
+                  ]}
+                >
+                  {item.label}
+                </Text>
+                {isActive && <View style={styles.activeIndicator} />}
+              </Pressable>
+            )
+          })}
         </View>
       </SafeAreaView>
     </LinearGradient>
@@ -87,10 +97,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
+  },
+  navItemActive: {
+    backgroundColor: 'rgba(0, 217, 255, 0.1)',
+    borderRadius: 8,
   },
   navItemPressed: {
-    opacity: 0.7,
+    opacity: 0.8,
   },
   iconWrapper: {
     width: 40,
@@ -98,11 +112,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  navLabel: {
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 4,
+  },
   activeIndicator: {
-    width: 6,
+    width: 4,
     height: 2,
     borderRadius: 1,
-    marginTop: 4,
     backgroundColor: '#00D9FF',
+    marginTop: 4,
   },
 })
