@@ -1,103 +1,187 @@
-import { useLocalSearchParams, useRouter } from 'expo-router'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
+  FlatList,
   Pressable,
+  SafeAreaView,
   StyleSheet,
   Text,
   View,
+  ActivityIndicator,
 } from 'react-native'
-import WebView from 'react-native-webview'
+import { Image } from 'expo-image'
+import { tmdbApi } from '@/src/api/tmdbApi'
+import { Star } from 'lucide-react-native'
+
+const POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500'
 
 export default function TrailerScreen() {
-  const params = useLocalSearchParams()
-  const router = useRouter()
-  const videoKey = params.videoKey as string
+  const [tvSeries, setTvSeries] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  if (!videoKey) {
+  useEffect(() => {
+    const loadTVSeries = async () => {
+      try {
+        setLoading(true)
+        const response = await tmdbApi.getTrending()
+        const seriesList = response.data.results?.slice(0, 12) || []
+        setTvSeries(seriesList)
+      } catch (error) {
+        console.log('Error loading TV series:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadTVSeries()
+  }, [])
+
+  const renderSeries = ({ item }: { item: any }) => {
+    const posterUrl = item.poster_path
+      ? `${POSTER_BASE_URL}${item.poster_path}`
+      : 'https://via.placeholder.com/500x750'
+    
+    const rating = item.vote_average ? item.vote_average.toFixed(1) : 'N/A'
+
     return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Video not available</Text>
-        <Pressable
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.backButtonText}>Go Back</Text>
-        </Pressable>
-      </View>
+      <Pressable style={styles.seriesContainer}>
+        <View style={styles.posterWrapper}>
+          <Image
+            source={{ uri: posterUrl }}
+            style={styles.poster}
+            contentFit="cover"
+          />
+          <View style={styles.ratingBadge}>
+            <Star size={14} color="#FFD700" fill="#FFD700" />
+            <Text style={styles.ratingText}>{rating}</Text>
+          </View>
+        </View>
+        <Text style={styles.title} numberOfLines={2}>
+          {item.name || item.title}
+        </Text>
+        <Text style={styles.year}>
+          {(item.first_air_date || item.release_date)?.split('-')[0] || 'N/A'}
+        </Text>
+      </Pressable>
     )
   }
 
-  const youtubeEmbedUrl = `https://www.youtube.com/embed/${videoKey}?autoplay=1`
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>TV Series</Text>
+        </View>
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#00D9FF" />
+          <Text style={styles.loadingText}>Loading TV series...</Text>
+        </View>
+      </SafeAreaView>
+    )
+  }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Pressable
-          style={styles.closeButton}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.closeButtonText}>✕</Text>
-        </Pressable>
-        <Text style={styles.title}>Trailer</Text>
-        <View style={{ width: 40 }} />
+        <Text style={styles.headerTitle}>TV Series</Text>
+        <Text style={styles.subtitle}>Popular shows</Text>
       </View>
 
-      <WebView
-        source={{ uri: youtubeEmbedUrl }}
-        style={styles.webView}
-        allowsFullscreenVideo
+      <FlatList
+        data={tvSeries}
+        renderItem={renderSeries}
+        keyExtractor={(item) => item.id.toString()}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
       />
-    </View>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a15',
+    backgroundColor: '#0f0f1e',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#0a0a15',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 217, 255, 0.1)',
   },
-  closeButton: {
-    width: 40,
-    height: 40,
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  subtitle: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
+  },
+  loaderContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  closeButtonText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '700',
+  loadingText: {
+    color: '#999',
+    marginTop: 12,
+    fontSize: 14,
+  },
+  row: {
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+    marginBottom: 12,
+  },
+  listContent: {
+    paddingHorizontal: 8,
+    paddingVertical: 12,
+  },
+  seriesContainer: {
+    flex: 1,
+    marginHorizontal: 4,
+  },
+  posterWrapper: {
+    position: 'relative',
+    marginBottom: 8,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#1a1a2e',
+  },
+  poster: {
+    width: '100%',
+    height: 220,
+  },
+  ratingBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  ratingText: {
+    color: '#FFD700',
+    fontSize: 12,
+    fontWeight: '600',
   },
   title: {
+    fontSize: 13,
+    fontWeight: '500',
     color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
+    marginBottom: 2,
   },
-  webView: {
-    flex: 1,
+  year: {
+    fontSize: 12,
+    color: '#999',
   },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000',
-  },
-  errorText: {
-    color: '#fff',
-    fontSize: 16,
-    marginBottom: 16,
-  },
-  backButton: {
-    backgroundColor: '#0a7ea4',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+})
     borderRadius: 6,
   },
   backButtonText: {
