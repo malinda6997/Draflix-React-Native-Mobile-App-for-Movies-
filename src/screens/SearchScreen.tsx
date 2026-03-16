@@ -1,6 +1,6 @@
 import { tmdbApi } from '@/src/api/tmdbApi'
 import { MovieCard } from '@/src/components/MovieCard'
-import { useRouter } from 'expo-router'
+import { useNavigation } from '@react-navigation/native'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
   FlatList,
@@ -16,7 +16,7 @@ import {
 import { ChevronLeft, Search, X } from 'lucide-react-native'
 
 export default function SearchScreen() {
-  const router = useRouter()
+  const navigation = useNavigation<any>()
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [recentSearches, setRecentSearches] = useState<string[]>(['Interstellar', 'The Jungle', 'Wedding 99'])
@@ -44,7 +44,7 @@ export default function SearchScreen() {
             setSearched(false)
           } else {
             // If in initial screen, replace with home tab
-            router.replace('/(tabs)')
+            navigation.navigate('index' as never)
           }
         }
       },
@@ -69,8 +69,8 @@ export default function SearchScreen() {
   }, [loadInitialData])
 
   const handleGoHome = () => {
-    // Replace current search tab with home tab to go back to home
-    router.replace('/(tabs)')
+    // Switch to home tab using tab navigator
+    navigation.navigate('index' as never)
   }
 
   const handleSearch = async (query: string) => {
