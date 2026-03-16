@@ -1,9 +1,10 @@
 import { tmdbApi } from '@/src/api/tmdbApi'
 import { MovieCard } from '@/src/components/MovieCard'
 import { useRouter } from 'expo-router'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
   FlatList,
+  PanResponder,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -24,6 +25,24 @@ export default function SearchScreen() {
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
 
+  // Gesture handler for right swipe
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Only trigger on right swipe (dx > 50) and minimal vertical movement
+        return Math.abs(gestureState.dx) > 50 && Math.abs(gestureState.dy) < 50
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        // Check if swiping right (positive dx > 50)
+        if (gestureState.dx > 50) {
+          // Trigger back navigation
+          router.back()
+        }
+      },
+    })
+  )
+
   const loadInitialData = useCallback(async () => {
     try {
       const [trending, topRated] = await Promise.all([
@@ -42,16 +61,7 @@ export default function SearchScreen() {
   }, [loadInitialData])
 
   const handleGoHome = () => {
-    try {
-      if (router.canGoBack()) {
-        router.back()
-      } else {
-        router.push('/(tabs)')
-      }
-    } catch (error) {
-      console.error('Navigation error:', error)
-      router.push('/(tabs)')
-    }
+    router.back()
   }
 
   const handleSearch = async (query: string) => {
@@ -117,7 +127,7 @@ export default function SearchScreen() {
 
   if (searched) {
     return (
-      <SafeAreaView style={styles.safeContainer}>
+      <SafeAreaView style={styles.safeContainer} {...panResponder.current.panHandlers}>
         <View style={styles.container}>
           {/* Search Bar */}
           <View style={styles.searchBarContainer}>
@@ -171,7 +181,7 @@ export default function SearchScreen() {
 
   // Initial search screen with recent searches and recommendations
   return (
-    <SafeAreaView style={styles.safeContainer}>
+    <SafeAreaView style={styles.safeContainer} {...panResponder.current.panHandlers}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Search Bar */}
         <View style={styles.searchBarContainer}>
