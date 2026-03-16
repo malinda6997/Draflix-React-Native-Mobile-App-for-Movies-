@@ -58,7 +58,7 @@ export default function WatchlistScreen() {
             contentFit="cover"
           />
           <View style={styles.savedBadge}>
-            <BookmarkCheck size={16} color="#00D9FF" fill="#00D9FF" />
+            <BookmarkCheck size={16} color="#FF0000" fill="#FF0000" />
           </View>
         </View>
         <Text style={styles.title} numberOfLines={2}>
@@ -78,7 +78,7 @@ export default function WatchlistScreen() {
           <Text style={styles.headerTitle}>Saved Shows</Text>
         </View>
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#00D9FF" />
+          <ActivityIndicator size="large" color="#FF0000" />
         </View>
       </View>
     )

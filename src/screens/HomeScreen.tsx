@@ -11,6 +11,7 @@ import {
   Text,
   TextInput,
   View,
+  Image,
 } from 'react-native'
 import { Bell, Search } from 'lucide-react-native'
 
@@ -96,12 +97,13 @@ export default function HomeScreen() {
         {/* Header Section */}
         <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <View style={styles.profilePic}>
-            <Text style={styles.profileText}>WK</Text>
-          </View>
+          <Image
+            source={require('../../assets/dp.png')}
+            style={styles.profilePic}
+          />
           <View>
             <Text style={styles.greeting}>Welcome back,</Text>
-            <Text style={styles.userName}>William Krisna</Text>
+            <Text style={styles.userName}>Malinda Prabath</Text>
           </View>
         </View>
         <Pressable style={styles.notificationIcon}>
@@ -223,13 +225,12 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#093FB4',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#093FB4',
+    backgroundColor: '#FF0000',
+    shadowColor: '#FF0000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
+    resizeMode: 'cover',
   },
   profileText: {
     color: '#fff',
@@ -263,7 +264,7 @@ const styles = StyleSheet.create({
     gap: 10,
     borderWidth: 1,
     borderColor: '#333333',
-    shadowColor: '#093FB4',
+    shadowColor: '#FF0000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -286,7 +287,7 @@ const styles = StyleSheet.create({
   },
   mainTitleBold: {
     fontWeight: '700',
-    color: '#093FB4',
+    color: '#FF0000',
   },
   genreScroll: {
     marginVertical: 16,

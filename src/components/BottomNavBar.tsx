@@ -1,52 +1,26 @@
-import React, { useState } from 'react'
-import { View, Pressable, StyleSheet, SafeAreaView, Text } from 'react-native'
-import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native'
-import { Home, Film, BookmarkCheck, Download } from 'lucide-react-native'
+import React from 'react'
+import { View, Pressable, StyleSheet, Text } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { Home, Film, BookmarkCheck, Cog } from 'lucide-react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 
-export default function BottomNavBar() {
-  const navigation = useNavigation<any>()
-  const route = useRoute()
-  const [activeTab, setActiveTab] = useState('(tabs)')
+interface TabBarProps {
+  state: any
+  descriptors: any
+  navigation: any
+  position?: any
+}
 
-  useFocusEffect(
-    React.useCallback(() => {
-      // Log the current route for debugging
-      console.log('Current route name:', route.name)
-      
-      // Map route names to tab screens
-      if (route.name === 'index' || route.name === '(tabs)') {
-        setActiveTab('index')
-      } else if (route.name === 'search') {
-        setActiveTab('search')
-      } else if (route.name === 'trailer') {
-        setActiveTab('trailer')
-      } else if (route.name === 'watchlist') {
-        setActiveTab('watchlist')
-      } else if (route.name === 'profile') {
-        setActiveTab('profile')
-      }
-    }, [route.name])
-  )
-
-  const handleNavigate = (screen: string) => {
-    setActiveTab(screen)
-    try {
-      if (navigation.jumpTo) {
-        navigation.jumpTo(screen)
-      } else {
-        navigation.navigate(screen as never)
-      }
-    } catch (error) {
-      console.log('Navigation error:', error)
-    }
-  }
-
+export default function BottomNavBar({
+  state,
+  descriptors,
+  navigation,
+}: TabBarProps) {
   const navItems = [
-    { label: 'Home', icon: Home, screen: 'index' },
-    { label: 'TV Series', icon: Film, screen: 'trailer' },
-    { label: 'Saved', icon: BookmarkCheck, screen: 'watchlist' },
-    { label: 'Download', icon: Download, screen: 'profile' },
+    { label: 'Home', icon: Home, name: 'index' },
+    { label: 'TV Series', icon: Film, name: 'trailer' },
+    { label: 'Saved', icon: BookmarkCheck, name: 'watchlist' },
+    { label: 'Settings', icon: Cog, name: 'profile' },
   ]
 
   return (
@@ -59,35 +33,52 @@ export default function BottomNavBar() {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.navContent}>
           {navItems.map((item) => {
-            const isActive = activeTab === item.screen
+            const isFocused = state.index === state.routes.findIndex((r: any) => r.name === item.name)
             const Icon = item.icon
+
+            const onPress = () => {
+              const event = navigation.emit({
+                type: 'tabPress',
+                target: item.name,
+                canPreventDefault: true,
+              })
+
+              if (!isFocused && !event.defaultPrevented) {
+                // Use jumpTo for tab navigation
+                if (navigation.jumpTo) {
+                  navigation.jumpTo(item.name)
+                } else {
+                  navigation.navigate(item.name)
+                }
+              }
+            }
 
             return (
               <Pressable
-                key={item.screen}
+                key={item.name}
                 style={({ pressed }) => [
                   styles.navItem,
                   pressed && styles.navItemPressed,
-                  isActive && styles.navItemActive,
+                  isFocused && styles.navItemActive,
                 ]}
-                onPress={() => handleNavigate(item.screen)}
+                onPress={onPress}
               >
                 <View style={styles.iconWrapper}>
                   <Icon
                     size={24}
-                    color={isActive ? '#00D9FF' : '#666'}
+                    color={isFocused ? '#FF0000' : '#666'}
                     strokeWidth={2}
                   />
                 </View>
                 <Text
                   style={[
                     styles.navLabel,
-                    { color: isActive ? '#00D9FF' : '#666' },
+                    { color: isFocused ? '#FF0000' : '#666' },
                   ]}
                 >
                   {item.label}
                 </Text>
-                {isActive && <View style={styles.activeIndicator} />}
+                {isFocused && <View style={styles.activeIndicator} />}
               </Pressable>
             )
           })}
@@ -100,7 +91,7 @@ export default function BottomNavBar() {
 const styles = StyleSheet.create({
   navContainer: {
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 217, 255, 0.1)',
+    borderTopColor: 'rgba(255, 0, 0, 0.1)',
   },
   safeArea: {
     backgroundColor: 'transparent',
@@ -118,7 +109,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   navItemActive: {
-    backgroundColor: 'rgba(0, 217, 255, 0.1)',
+    backgroundColor: 'rgba(255, 0, 0, 0.1)',
     borderRadius: 8,
   },
   navItemPressed: {
@@ -139,7 +130,7 @@ const styles = StyleSheet.create({
     width: 4,
     height: 2,
     borderRadius: 1,
-    backgroundColor: '#00D9FF',
+    backgroundColor: '#FF0000',
     marginTop: 4,
   },
 })

@@ -62,8 +62,8 @@ export default function TrailerScreen() {
           >
             <BookmarkCheck 
               size={20} 
-              color={isSaved ? '#00D9FF' : '#fff'} 
-              fill={isSaved ? '#00D9FF' : 'none'}
+              color={isSaved ? '#FF0000' : '#fff'} 
+              fill={isSaved ? '#FF0000' : 'none'}
             />
           </Pressable>
         </View>
@@ -84,7 +84,7 @@ export default function TrailerScreen() {
           <Text style={styles.headerTitle}>TV Series</Text>
         </View>
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#00D9FF" />
+          <ActivityIndicator size="large" color="#FF0000" />
           <Text style={styles.loadingText}>Loading TV series...</Text>
         </View>
       </View>

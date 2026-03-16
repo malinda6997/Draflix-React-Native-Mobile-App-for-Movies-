@@ -393,13 +393,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   trailerButtonText: {
-    color: '#0D1A63',
+    color: '#fff',
     fontWeight: '700',
     fontSize: 15,
   },
   watchButton: {
     flex: 1,
-    backgroundColor: '#093FB4',
+    backgroundColor: '#FF0000',
     paddingVertical: 14,
     borderRadius: 12,
     flexDirection: 'row',

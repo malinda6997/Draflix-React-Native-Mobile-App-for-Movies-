@@ -1,3 +1,3 @@
-import ProfileScreen from '@/src/screens/ProfileScreen'
+import SettingsScreen from '@/src/screens/SettingsScreen'
 
-export default ProfileScreen
+export default SettingsScreen
