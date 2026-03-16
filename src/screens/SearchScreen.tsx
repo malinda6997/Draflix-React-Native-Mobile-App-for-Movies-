@@ -37,9 +37,9 @@ export default function SearchScreen() {
     }
   }, [])
 
-  useEffect(() => {
-    loadInitialData()
-  }, [loadInitialData])
+  const handleGoHome = () => {
+    router.push('/(tabs)')
+  }
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query)
@@ -78,6 +78,20 @@ export default function SearchScreen() {
     setSearched(false)
   }
 
+  const handleGoHome = () => {
+    router.push('/(tabs)')
+  }
+
+  const handleBack = () => {
+    if (searched) {
+      setSearchQuery('')
+      setSearchResults([])
+      setSearched(false)
+    } else {
+      handleGoHome()
+    }
+  }
+
   const renderMovieGrid = () => {
     return (
       <FlatList
@@ -98,7 +112,7 @@ export default function SearchScreen() {
         <View style={styles.container}>
           {/* Search Bar */}
           <View style={styles.searchBarContainer}>
-            <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <Pressable onPress={handleGoHome} style={styles.backButton}>
               <ChevronLeft size={24} color="#fff" />
             </Pressable>
             <View style={styles.searchInputWrapper}>
@@ -152,7 +166,7 @@ export default function SearchScreen() {
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Search Bar */}
         <View style={styles.searchBarContainer}>
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <Pressable onPress={handleBack} style={styles.backButton}>
             <ChevronLeft size={24} color="#fff" />
           </Pressable>
           <View style={styles.searchInputWrapper}>
@@ -243,16 +257,23 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   backButton: {
-    padding: 8,
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: '#1a1a2e',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#2a2a3e',
   },
   searchInputWrapper: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#1a1a2e',
-    borderRadius: 10,
+    borderRadius: 8,
     paddingHorizontal: 12,
-    height: 44,
+    height: 40,
     gap: 10,
     borderWidth: 1,
     borderColor: '#2a2a3e',
