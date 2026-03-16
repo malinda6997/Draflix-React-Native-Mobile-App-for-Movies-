@@ -1,114 +1,48 @@
-import { useSignIn } from '@clerk/expo'
-import * as WebBrowser from 'expo-web-browser'
 import { type Href, Link, useRouter } from 'expo-router'
 import React from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
-// Warm up browser for faster OAuth
-WebBrowser.maybeCompleteAuthSession()
-
 export default function Page() {
-  const { signIn, errors, fetchStatus } = useSignIn()
   const router = useRouter()
 
   const [emailAddress, setEmailAddress] = React.useState('')
   const [password, setPassword] = React.useState('')
-  const [code, setCode] = React.useState('')
-  const [loadingGoogle, setLoadingGoogle] = React.useState(false)
+  const [loading, setLoading] = React.useState(false)
+  const [error, setError] = React.useState('')
 
   const handleSubmit = async () => {
-    const { error } = await signIn.password({
-      emailAddress,
-      password,
-    })
-    if (error) {
-      console.error(JSON.stringify(error, null, 2))
-      return
-    }
-
-    if (signIn.status === 'complete') {
-      router.push('/' as Href)
-    } else if (signIn.status === 'needs_second_factor' || signIn.status === 'needs_client_trust') {
-      // Handle second factor or client trust verification
-      // For other second factor strategies,
-      // see https://clerk.com/docs/guides/development/custom-flows/authentication/multi-factor-authentication
-      // see https://clerk.com/docs/guides/development/custom-flows/authentication/client-trust
-      const emailCodeFactor = signIn.supportedSecondFactors.find(
-        (factor) => factor.strategy === 'email_code',
-      )
-
-      if (emailCodeFactor) {
-        await signIn.mfa.sendEmailCode()
+    setError('')
+    setLoading(true)
+    try {
+      // TODO: Connect to your backend API for authentication
+      if (!emailAddress || !password) {
+        setError('Please fill in all fields')
+        return
       }
-    } else {
-      // Check why the sign-in is not complete
-      console.error('Sign-in attempt not complete:', signIn)
-    }
-  }
-
-  const handleVerify = async () => {
-    await signIn.mfa.verifyEmailCode({ code })
-
-    if (signIn.status === 'complete') {
+      
+      // Example: const response = await fetch('YOUR_API/login', {...})
+      console.log('Sign in attempt:', { emailAddress, password })
+      
+      // On successful authentication, navigate to home
       router.push('/' as Href)
-    } else {
-      // Check why the sign-in is not complete
-      console.error('Sign-in attempt not complete:', signIn)
+    } catch (err: any) {
+      setError(err.message || 'Sign in failed')
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleGoogleSignIn = async () => {
-    setLoadingGoogle(true)
+    setLoading(true)
     try {
-      // Use Clerk's native OAuth method with expo-web-browser
-      const result = await signIn.create({
-        strategy: 'oauth_google',
-      })
-
-      if (result.status === 'complete') {
-        router.push('/' as Href)
-      }
-    } catch (error: any) {
-      console.error('Google Sign-In error:', error)
+      // TODO: Implement Google Sign-In using Expo Google authentication
+      console.log('Google Sign-In initiated')
+      router.push('/' as Href)
+    } catch (err: any) {
+      setError(err.message || 'Google Sign-In failed')
     } finally {
-      setLoadingGoogle(false)
+      setLoading(false)
     }
-  }
-
-  if (signIn.status === 'needs_second_factor' || signIn.status === 'needs_client_trust') {
-    return (
-      <View style={styles.container}>
-        <Text style={[styles.title, { fontSize: 24, fontWeight: 'bold' }]}>
-          Verify your account
-        </Text>
-        <TextInput
-          style={styles.input}
-          value={code}
-          placeholder="Enter your verification code"
-          placeholderTextColor="#666666"
-          onChangeText={(code) => setCode(code)}
-          keyboardType="numeric"
-        />
-        {errors.fields.code && <Text style={styles.error}>{errors.fields.code.message}</Text>}
-        <Pressable
-          style={({ pressed }) => [
-            styles.button,
-            fetchStatus === 'fetching' && styles.buttonDisabled,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={handleVerify}
-          disabled={fetchStatus === 'fetching'}
-        >
-          <Text style={styles.buttonText}>Verify</Text>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
-          onPress={() => signIn.mfa.sendEmailCode()}
-        >
-          <Text style={styles.secondaryButtonText}>I need a new code</Text>
-        </Pressable>
-      </View>
-    )
   }
 
   return (
@@ -119,14 +53,14 @@ export default function Page() {
       <Pressable
         style={({ pressed }) => [
           styles.googleButton,
-          loadingGoogle && styles.buttonDisabled,
+          loading && styles.buttonDisabled,
           pressed && styles.buttonPressed,
         ]}
         onPress={handleGoogleSignIn}
-        disabled={loadingGoogle}
+        disabled={loading}
       >
         <Text style={styles.googleButtonText}>
-          {loadingGoogle ? 'Signing in...' : '🔐 Sign in with Google'}
+          {loading ? 'Signing in...' : '🔐 Sign in with Google'}
         </Text>
       </Pressable>
 
@@ -148,9 +82,7 @@ export default function Page() {
         onChangeText={(emailAddress) => setEmailAddress(emailAddress)}
         keyboardType="email-address"
       />
-      {errors.fields.identifier && (
-        <Text style={styles.error}>{errors.fields.identifier.message}</Text>
-      )}
+
       <Text style={styles.label}>Password</Text>
       <TextInput
         style={styles.input}
@@ -160,20 +92,20 @@ export default function Page() {
         secureTextEntry={true}
         onChangeText={(password) => setPassword(password)}
       />
-      {errors.fields.password && <Text style={styles.error}>{errors.fields.password.message}</Text>}
+
+      {error && <Text style={styles.error}>{error}</Text>}
+
       <Pressable
         style={({ pressed }) => [
           styles.button,
-          (!emailAddress || !password || fetchStatus === 'fetching') && styles.buttonDisabled,
+          (!emailAddress || !password || loading) && styles.buttonDisabled,
           pressed && styles.buttonPressed,
         ]}
         onPress={handleSubmit}
-        disabled={!emailAddress || !password || fetchStatus === 'fetching'}
+        disabled={!emailAddress || !password || loading}
       >
-        <Text style={styles.buttonText}>Continue</Text>
+        <Text style={styles.buttonText}>{loading ? 'Signing in...' : 'Continue'}</Text>
       </Pressable>
-      {/* For your debugging purposes. You can just console.log errors, but we put them in the UI for convenience */}
-      {errors && <Text style={styles.debug}>{JSON.stringify(errors, null, 2)}</Text>}
 
       <View style={styles.linkContainer}>
         <Text>Don't have an account? </Text>
@@ -255,17 +187,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
   },
-  secondaryButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  secondaryButtonText: {
-    color: '#0a7ea4',
-    fontWeight: '600',
-  },
   linkContainer: {
     flexDirection: 'row',
     gap: 4,
@@ -276,10 +197,5 @@ const styles = StyleSheet.create({
     color: '#d32f2f',
     fontSize: 12,
     marginTop: -8,
-  },
-  debug: {
-    fontSize: 10,
-    opacity: 0.5,
-    marginTop: 8,
   },
 })

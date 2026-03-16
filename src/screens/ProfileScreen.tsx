@@ -1,5 +1,4 @@
-import { useClerk, useUser } from '@clerk/expo'
-import { Image } from 'expo-image'
+import { useRouter } from 'expo-router'
 import React from 'react'
 import {
   Pressable,
@@ -11,12 +10,14 @@ import {
 } from 'react-native'
 
 export default function ProfileScreen() {
-  const { user } = useUser()
-  const { signOut } = useClerk()
+  const router = useRouter()
 
   const handleSignOut = async () => {
     try {
-      await signOut()
+      // TODO: Clear user session from your backend
+      console.log('Signing out...')
+      // Navigate to sign-in
+      router.push('/(auth)/sign-in')
     } catch (error) {
       console.error('Sign out error:', error)
     }
@@ -27,16 +28,9 @@ export default function ProfileScreen() {
       <ScrollView style={styles.container}>
         {/* User Profile Card */}
         <View style={styles.profileCard}>
-          {user?.imageUrl && (
-            <Image
-              source={{ uri: user.imageUrl }}
-              style={styles.avatar}
-            />
-          )}
-          <Text style={styles.userName}>
-            {user?.firstName || 'User'} {user?.lastName || ''}
-          </Text>
-          <Text style={styles.userEmail}>{user?.emailAddresses[0]?.emailAddress}</Text>
+          <View style={styles.avatarPlaceholder} />
+          <Text style={styles.userName}>Guest User</Text>
+          <Text style={styles.userEmail}>user@example.com</Text>
         </View>
 
         {/* Quick Stats */}
@@ -102,10 +96,11 @@ const styles = StyleSheet.create({
     borderBottomColor: '#1a1a1a',
     marginBottom: 30,
   },
-  avatar: {
+  avatarPlaceholder: {
     width: 100,
     height: 100,
     borderRadius: 50,
+    backgroundColor: '#1a1a2e',
     marginBottom: 16,
   },
   userName: {

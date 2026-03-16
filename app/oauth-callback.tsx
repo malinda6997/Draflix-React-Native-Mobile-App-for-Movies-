@@ -1,21 +1,14 @@
-import { useAuth } from '@clerk/expo'
 import { useRouter } from 'expo-router'
 import React, { useEffect } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 
 export default function OAuthCallback() {
   const router = useRouter()
-  const { isSignedIn, isLoaded } = useAuth()
 
   useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      // Redirect to home/tabs after successful OAuth
-      router.replace('/(tabs)')
-    } else if (isLoaded && !isSignedIn) {
-      // If still not signed in, go back to sign in
-      router.replace('/(auth)/sign-in')
-    }
-  }, [isLoaded, isSignedIn, router])
+    // Redirect to home after OAuth callback
+    router.replace('/(tabs)')
+  }, [router])
 
   return (
     <View style={styles.container}>

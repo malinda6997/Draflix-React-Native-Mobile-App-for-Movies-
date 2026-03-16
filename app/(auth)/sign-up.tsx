@@ -1,101 +1,49 @@
-import { useSignUp } from '@clerk/expo'
-import * as WebBrowser from 'expo-web-browser'
 import { type Href, Link, useRouter } from 'expo-router'
 import React from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
-// Warm up browser for faster OAuth
-WebBrowser.maybeCompleteAuthSession()
-
 export default function SignUpPage() {
-  const { signUp, errors, fetchStatus } = useSignUp()
   const router = useRouter()
 
   const [emailAddress, setEmailAddress] = React.useState('')
   const [password, setPassword] = React.useState('')
-  const [code, setCode] = React.useState('')
   const [firstName, setFirstName] = React.useState('')
   const [lastName, setLastName] = React.useState('')
-  const [loadingGoogle, setLoadingGoogle] = React.useState(false)
+  const [loading, setLoading] = React.useState(false)
+  const [error, setError] = React.useState('')
 
   const handleSubmit = async () => {
+    setError('')
+    setLoading(true)
     try {
-      await signUp.create({
-        emailAddress,
-        password,
-        firstName,
-        lastName,
-      })
-
-      // Send verification email
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
-    } catch (err: any) {
-      console.error(JSON.stringify(err, null, 2))
-    }
-  }
-
-  const handleVerify = async () => {
-    try {
-      await signUp.attemptEmailAddressVerification({
-        code,
-      })
-
-      if (signUp.status === 'complete') {
-        router.push('/' as Href)
-      } else {
-        console.error('Sign-up incomplete:', signUp)
+      // TODO: Connect to your backend API for user registration
+      if (!emailAddress || !password || !firstName || !lastName) {
+        setError('Please fill in all fields')
+        return
       }
+
+      console.log('Sign up attempt:', { emailAddress, password, firstName, lastName })
+      
+      // On successful registration, navigate to home
+      router.push('/' as Href)
     } catch (err: any) {
-      console.error(JSON.stringify(err, null, 2))
+      setError(err.message || 'Sign up failed')
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleGoogleSignUp = async () => {
-    setLoadingGoogle(true)
+    setLoading(true)
     try {
-      // Use Clerk's native OAuth method with expo-web-browser
-      const result = await signUp.create({
-        strategy: 'oauth_google',
-      })
-
-      if (result.status === 'complete') {
-        router.push('/' as Href)
-      }
-    } catch (error: any) {
-      console.error('Google Sign-Up error:', error)
+      // TODO: Implement Google Sign-Up using Expo Google authentication
+      console.log('Google Sign-Up initiated')
+      router.push('/' as Href)
+    } catch (err: any) {
+      setError(err.message || 'Google Sign-Up failed')
     } finally {
-      setLoadingGoogle(false)
+      setLoading(false)
     }
-  }
-
-  if (signUp.status === 'missing_requirements') {
-    return (
-      <View style={styles.container}>
-        <Text style={[styles.title, { fontSize: 24, fontWeight: 'bold' }]}>
-          Verify your email
-        </Text>
-        <TextInput
-          style={styles.input}
-          value={code}
-          placeholder="Enter verification code"
-          placeholderTextColor="#666666"
-          onChangeText={(code) => setCode(code)}
-          keyboardType="numeric"
-        />
-        {errors.fields.code && <Text style={styles.error}>{errors.fields.code.message}</Text>}
-        <Pressable
-          style={({ pressed }) => [
-            styles.button,
-            fetchStatus === 'fetching' && styles.buttonDisabled,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={handleVerify}
-          disabled={fetchStatus === 'fetching'}
-        >
-          <Text style={styles.buttonText}>Verify Email</Text>
-        </Pressable>
-      </View>
-    )
   }
 
   return (
@@ -106,14 +54,14 @@ export default function SignUpPage() {
       <Pressable
         style={({ pressed }) => [
           styles.googleButton,
-          loadingGoogle && styles.buttonDisabled,
+          loading && styles.buttonDisabled,
           pressed && styles.buttonPressed,
         ]}
         onPress={handleGoogleSignUp}
-        disabled={loadingGoogle}
+        disabled={loading}
       >
         <Text style={styles.googleButtonText}>
-          {loadingGoogle ? 'Signing up...' : '🔐 Sign up with Google'}
+          {loading ? 'Signing up...' : '🔐 Sign up with Google'}
         </Text>
       </Pressable>
 
@@ -132,9 +80,6 @@ export default function SignUpPage() {
         placeholderTextColor="#666666"
         onChangeText={(firstName) => setFirstName(firstName)}
       />
-      {errors.fields.firstName && (
-        <Text style={styles.error}>{errors.fields.firstName.message}</Text>
-      )}
 
       <Text style={styles.label}>Last Name</Text>
       <TextInput
@@ -144,9 +89,6 @@ export default function SignUpPage() {
         placeholderTextColor="#666666"
         onChangeText={(lastName) => setLastName(lastName)}
       />
-      {errors.fields.lastName && (
-        <Text style={styles.error}>{errors.fields.lastName.message}</Text>
-      )}
 
       <Text style={styles.label}>Email address</Text>
       <TextInput
@@ -158,9 +100,6 @@ export default function SignUpPage() {
         onChangeText={(emailAddress) => setEmailAddress(emailAddress)}
         keyboardType="email-address"
       />
-      {errors.fields.identifier && (
-        <Text style={styles.error}>{errors.fields.identifier.message}</Text>
-      )}
 
       <Text style={styles.label}>Password</Text>
       <TextInput
@@ -171,22 +110,21 @@ export default function SignUpPage() {
         secureTextEntry={true}
         onChangeText={(password) => setPassword(password)}
       />
-      {errors.fields.password && <Text style={styles.error}>{errors.fields.password.message}</Text>}
+
+      {error && <Text style={styles.error}>{error}</Text>}
 
       <Pressable
         style={({ pressed }) => [
           styles.button,
-          (!emailAddress || !password || !firstName || !lastName || fetchStatus === 'fetching') &&
+          (!emailAddress || !password || !firstName || !lastName || loading) &&
             styles.buttonDisabled,
           pressed && styles.buttonPressed,
         ]}
         onPress={handleSubmit}
-        disabled={!emailAddress || !password || !firstName || !lastName || fetchStatus === 'fetching'}
+        disabled={!emailAddress || !password || !firstName || !lastName || loading}
       >
-        <Text style={styles.buttonText}>Sign up</Text>
+        <Text style={styles.buttonText}>{loading ? 'Signing up...' : 'Sign up'}</Text>
       </Pressable>
-
-      {errors && <Text style={styles.debug}>{JSON.stringify(errors, null, 2)}</Text>}
 
       <View style={styles.linkContainer}>
         <Text>Already have an account? </Text>
@@ -278,10 +216,5 @@ const styles = StyleSheet.create({
     color: '#d32f2f',
     fontSize: 12,
     marginTop: -8,
-  },
-  debug: {
-    fontSize: 10,
-    opacity: 0.5,
-    marginTop: 8,
   },
 })
