@@ -1,7 +1,9 @@
 import { useWatchlist } from '@/src/hooks/useWatchlist'
+import { useRouter } from 'expo-router'
 import React, { useState, useEffect } from 'react'
 import {
   FlatList,
+  Pressable,
   StyleSheet,
   Text,
   View,
@@ -14,6 +16,7 @@ import { tmdbApi } from '@/src/api/tmdbApi'
 const POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500'
 
 export default function WatchlistScreen() {
+  const router = useRouter()
   const { watchlist } = useWatchlist()
   const [savedItems, setSavedItems] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -50,7 +53,13 @@ export default function WatchlistScreen() {
       : 'https://via.placeholder.com/500x750'
 
     return (
-      <View style={styles.itemContainer}>
+      <Pressable 
+        style={styles.itemContainer}
+        onPress={() => router.push({
+          pathname: '/movie-detail',
+          params: { movieId: item.id }
+        } as any)}
+      >
         <View style={styles.posterWrapper}>
           <Image
             source={{ uri: posterUrl }}
@@ -67,7 +76,7 @@ export default function WatchlistScreen() {
         <Text style={styles.year}>
           {(item.first_air_date || item.release_date)?.split('-')[0] || 'N/A'}
         </Text>
-      </View>
+      </Pressable>
     )
   }
 
