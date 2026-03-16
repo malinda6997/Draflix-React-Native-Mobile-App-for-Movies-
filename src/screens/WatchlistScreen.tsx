@@ -1,64 +1,66 @@
-import { useWatchlist } from '@/src/hooks/useWatchlist'
-import { useRouter } from 'expo-router'
-import React, { useState, useEffect } from 'react'
+import { tmdbApi } from "@/src/api/tmdbApi";
+import { useWatchlist } from "@/src/hooks/useWatchlist";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { BookmarkCheck } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
 import {
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  ActivityIndicator,
-} from 'react-native'
-import { Image } from 'expo-image'
-import { BookmarkCheck } from 'lucide-react-native'
-import { tmdbApi } from '@/src/api/tmdbApi'
+    ActivityIndicator,
+    FlatList,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
 
-const POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500'
+const POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
 export default function WatchlistScreen() {
-  const router = useRouter()
-  const { watchlist } = useWatchlist()
-  const [savedItems, setSavedItems] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const router = useRouter();
+  const { watchlist } = useWatchlist();
+  const [savedItems, setSavedItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadSavedShows = async () => {
       try {
-        setLoading(true)
-        
+        setLoading(true);
+
         if (!watchlist || watchlist.length === 0) {
-          setSavedItems([])
-          setLoading(false)
-          return
+          setSavedItems([]);
+          setLoading(false);
+          return;
         }
 
-        const response = await tmdbApi.getTrending()
-        const allShows = response.data.results || []
-        const saved = allShows.filter(show => watchlist.includes(show.id))
-        setSavedItems(saved)
+        const response = await tmdbApi.getTrending();
+        const allShows = response.data.results || [];
+        const saved = allShows.filter((show) => watchlist.includes(show.id));
+        setSavedItems(saved);
       } catch (error) {
-        console.log('Error loading saved shows:', error)
-        setSavedItems([])
+        console.log("Error loading saved shows:", error);
+        setSavedItems([]);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    
-    loadSavedShows()
-  }, [watchlist])
+    };
+
+    loadSavedShows();
+  }, [watchlist]);
 
   const renderSavedItem = ({ item }: { item: any }) => {
     const posterUrl = item.poster_path
       ? `${POSTER_BASE_URL}${item.poster_path}`
-      : 'https://via.placeholder.com/500x750'
+      : "https://via.placeholder.com/500x750";
 
     return (
-      <Pressable 
+      <Pressable
         style={styles.itemContainer}
-        onPress={() => router.push({
-          pathname: '/movie-detail',
-          params: { movieId: item.id }
-        } as any)}
+        onPress={() =>
+          router.push({
+            pathname: "/movie-detail",
+            params: { movieId: item.id },
+          } as any)
+        }
       >
         <View style={styles.posterWrapper}>
           <Image
@@ -74,11 +76,11 @@ export default function WatchlistScreen() {
           {item.name || item.title}
         </Text>
         <Text style={styles.year}>
-          {(item.first_air_date || item.release_date)?.split('-')[0] || 'N/A'}
+          {(item.first_air_date || item.release_date)?.split("-")[0] || "N/A"}
         </Text>
       </Pressable>
-    )
-  }
+    );
+  };
 
   if (loading) {
     return (
@@ -90,7 +92,7 @@ export default function WatchlistScreen() {
           <ActivityIndicator size="large" color="#FF0000" />
         </View>
       </View>
-    )
+    );
   }
 
   if (watchlist.length === 0 || savedItems.length === 0) {
@@ -106,7 +108,7 @@ export default function WatchlistScreen() {
           </Text>
         </View>
       </View>
-    )
+    );
   }
 
   return (
@@ -126,55 +128,55 @@ export default function WatchlistScreen() {
         showsVerticalScrollIndicator={false}
       />
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f0f1e',
+    backgroundColor: "#0f0f1e",
   },
   header: {
     paddingHorizontal: 16,
     paddingVertical: 12,
     paddingTop: 40,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 217, 255, 0.1)',
+    borderBottomColor: "rgba(0, 217, 255, 0.1)",
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#fff',
+    fontWeight: "700",
+    color: "#fff",
   },
   count: {
     fontSize: 12,
-    color: '#999',
+    color: "#999",
     marginTop: 4,
   },
   loaderContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 20,
   },
   emptyTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#fff',
+    fontWeight: "600",
+    color: "#fff",
     marginBottom: 8,
   },
   emptyDescription: {
     fontSize: 14,
-    color: '#999',
-    textAlign: 'center',
+    color: "#999",
+    textAlign: "center",
   },
   row: {
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
     paddingHorizontal: 8,
     marginBottom: 12,
   },
@@ -187,35 +189,35 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   posterWrapper: {
-    position: 'relative',
+    position: "relative",
     marginBottom: 8,
     borderRadius: 8,
-    overflow: 'hidden',
-    backgroundColor: '#1a1a2e',
+    overflow: "hidden",
+    backgroundColor: "#1a1a2e",
   },
   poster: {
-    width: '100%',
+    width: "100%",
     height: 220,
   },
   savedBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: 8,
     right: 8,
     width: 32,
     height: 32,
-    backgroundColor: 'rgba(0, 217, 255, 0.2)',
+    backgroundColor: "rgba(0, 217, 255, 0.2)",
     borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
     fontSize: 13,
-    fontWeight: '500',
-    color: '#fff',
+    fontWeight: "500",
+    color: "#fff",
     marginBottom: 2,
   },
   year: {
     fontSize: 12,
-    color: '#999',
+    color: "#999",
   },
-})
+});

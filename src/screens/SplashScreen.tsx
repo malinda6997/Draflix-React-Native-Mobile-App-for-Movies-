@@ -1,45 +1,55 @@
-import { useRouter } from 'expo-router'
-import React, { useEffect } from 'react'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import React from "react";
+import {
+  ImageBackground,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 export default function SplashScreen() {
-  const router = useRouter()
-
-  useEffect(() => {
-    // Skip directly to home after 2 seconds
-    const timer = setTimeout(() => {
-      router.replace('/(tabs)')
-    }, 2000)
-
-    return () => clearTimeout(timer)
-  }, [router])
+  const router = useRouter();
 
   const handleStartNow = () => {
-    router.push('/(tabs)')
-  }
+    router.push("/(tabs)");
+  };
 
   return (
-    <View
+    <ImageBackground
+      source={require("../../assets/background-spalsh.jpg")}
       style={styles.container}
     >
-      <View style={styles.content}>
-        {/* Logo Section */}
-        <View style={styles.logoContainer}>
-          <Text style={styles.logo}>DRAFLIX</Text>
-          <Text style={styles.subtitle}>Discover Premium Movies</Text>
-        </View>
+      {/* Dark Overlay */}
+      <View style={styles.overlay} />
 
-        {/* Hero Text */}
-        <View style={styles.heroSection}>
-          <Text style={styles.heroTitle}>Your Gateway to</Text>
-          <Text style={styles.heroHighlight}>Cinematic Excellence</Text>
-          <Text style={styles.heroDescription}>
-            Stream trending movies and build your personal watchlist
-          </Text>
+      <View style={styles.content}>
+        {/* Logo Image Section */}
+        <View style={styles.logoContainer}>
+          <Image
+            source={require("../../assets/logo-spash.png")}
+            style={styles.logoImage}
+            contentFit="contain"
+          />
         </View>
       </View>
 
-      {/* Start Button */}
+      {/* Text Section Near Button */}
+      <View style={styles.textBottomSection}>
+        {/* Main Bold Text */}
+        <Text style={styles.slogan}>
+          Stream Your Favorite Movies Anytime, Anywhere
+        </Text>
+
+        {/* Hero Text */}
+        <Text style={styles.heroDescription}>
+          Discover trending films, build your watchlist, and never miss a
+          blockbuster
+        </Text>
+      </View>
+
+      {/* Get Started Button */}
       <View style={styles.buttonContainer}>
         <Pressable
           style={({ pressed }) => [
@@ -48,89 +58,117 @@ export default function SplashScreen() {
           ]}
           onPress={handleStartNow}
         >
-          <Text style={styles.startButtonText}>Start Now</Text>
+          <Text style={styles.startButtonText}>Get Started</Text>
         </Pressable>
-        <Text style={styles.disclaimerText}>
-          Sign in or create an account to get started
-        </Text>
       </View>
-    </View>
-  )
+    </ImageBackground>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#0a0a15',
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(86, 44, 8, 0.5)",
+    zIndex: 1,
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "flex-start",
+    alignItems: "center",
     paddingHorizontal: 20,
+    paddingTop: 80,
+    zIndex: 2,
+  },
+  textBottomSection: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    marginBottom: 30,
+    zIndex: 2,
   },
   logoContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 60,
   },
-  logo: {
-    fontSize: 56,
-    fontWeight: '900',
-    color: '#fff',
-    letterSpacing: 3,
+  logoImage: {
+    width: 160,
+    height: 160,
+    borderRadius: 24,
+  },
+  mainTextSection: {
+    alignItems: "center",
+    marginBottom: 30,
+  },
+  mainTitle: {
+    fontSize: 50,
+    fontWeight: "900",
+    color: "#fff",
+    letterSpacing: 4,
+    marginBottom: 12,
+  },
+  slogan: {
+    fontSize: 42,
+    color: "#fff",
+    textAlign: "left",
+    fontWeight: "700",
+    marginBottom: 12,
+    lineHeight: 50,
   },
   subtitle: {
-    fontSize: 14,
-    color: '#0a7ea4',
+    fontSize: 10,
+    color: "#0a7ea4",
     marginTop: 8,
-    fontWeight: '600',
+    fontWeight: "600",
     letterSpacing: 1,
   },
   heroSection: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 16,
   },
   heroTitle: {
-    fontSize: 28,
-    color: '#ccc',
-    fontWeight: '600',
-  },
-  heroHighlight: {
-    fontSize: 36,
-    fontWeight: '900',
-    color: '#fff',
+    fontSize: 32,
+    color: "#ccc",
+    fontWeight: "600",
   },
   heroDescription: {
     fontSize: 14,
-    color: '#999',
-    textAlign: 'center',
-    marginTop: 12,
+    color: "#e1e1e1",
+    textAlign: "left",
+    fontWeight: "500",
   },
   buttonContainer: {
-    paddingBottom: 60,
-    alignItems: 'center',
+    paddingBottom: 50,
+    alignItems: "center",
     gap: 12,
+    zIndex: 2,
   },
   startButton: {
-    backgroundColor: '#0a7ea4',
-    paddingHorizontal: 60,
-    paddingVertical: 16,
+    backgroundColor: "#E50914",
+    paddingHorizontal: 120,
+    paddingVertical: 20,
     borderRadius: 12,
-    width: '80%',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
   },
   startButtonPressed: {
-    opacity: 0.7,
+    opacity: 0.8,
   },
   startButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "800",
+    letterSpacing: 1,
   },
   disclaimerText: {
-    color: '#666',
+    color: "#666",
     fontSize: 12,
   },
-})
+});
