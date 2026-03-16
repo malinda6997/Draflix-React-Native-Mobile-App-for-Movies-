@@ -66,7 +66,7 @@ export default function TrailerScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>TV Series</Text>
         </View>
@@ -74,12 +74,12 @@ export default function TrailerScreen() {
           <ActivityIndicator size="large" color="#00D9FF" />
           <Text style={styles.loadingText}>Loading TV series...</Text>
         </View>
-      </SafeAreaView>
+      </View>
     )
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>TV Series</Text>
         <Text style={styles.subtitle}>Popular shows</Text>
@@ -94,7 +94,7 @@ export default function TrailerScreen() {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />
-    </SafeAreaView>
+    </View>
   )
 }
 
