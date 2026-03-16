@@ -7,22 +7,31 @@ import { LinearGradient } from 'expo-linear-gradient'
 export default function BottomNavBar() {
   const navigation = useNavigation<any>()
   const route = useRoute()
-  const [activeTab, setActiveTab] = useState('index')
+  const [activeTab, setActiveTab] = useState('(tabs)')
 
   useFocusEffect(
     React.useCallback(() => {
-      if (route.name === 'index') setActiveTab('index')
-      else if (route.name === 'search') setActiveTab('search')
-      else if (route.name === 'trailer') setActiveTab('trailer')
-      else if (route.name === 'watchlist') setActiveTab('watchlist')
-      else if (route.name === 'profile') setActiveTab('profile')
+      // Log the current route for debugging
+      console.log('Current route name:', route.name)
+      
+      // Map route names to tab screens
+      if (route.name === 'index' || route.name === '(tabs)') {
+        setActiveTab('index')
+      } else if (route.name === 'search') {
+        setActiveTab('search')
+      } else if (route.name === 'trailer') {
+        setActiveTab('trailer')
+      } else if (route.name === 'watchlist') {
+        setActiveTab('watchlist')
+      } else if (route.name === 'profile') {
+        setActiveTab('profile')
+      }
     }, [route.name])
   )
 
   const handleNavigate = (screen: string) => {
     setActiveTab(screen)
     try {
-      // Use jumpTo for tab navigation which is more reliable
       if (navigation.jumpTo) {
         navigation.jumpTo(screen)
       } else {

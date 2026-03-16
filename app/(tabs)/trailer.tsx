@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import {
   FlatList,
   Pressable,
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
@@ -67,7 +66,7 @@ export default function TVSeriesScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>TV Series</Text>
         </View>
@@ -75,12 +74,12 @@ export default function TVSeriesScreen() {
           <ActivityIndicator size="large" color="#00D9FF" />
           <Text style={styles.loadingText}>Loading TV series...</Text>
         </View>
-      </SafeAreaView>
+      </View>
     )
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>TV Series</Text>
         <Text style={styles.subtitle}>Popular shows</Text>
@@ -95,7 +94,7 @@ export default function TVSeriesScreen() {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />
-    </SafeAreaView>
+    </View>
   )
 }
 
