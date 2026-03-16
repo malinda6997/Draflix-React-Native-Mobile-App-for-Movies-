@@ -1,28 +1,49 @@
 import { useWatchlist } from '@/src/hooks/useWatchlist'
-import { useFocusEffect } from '@react-navigation/native'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import {
   FlatList,
   StyleSheet,
   Text,
   View,
   ActivityIndicator,
+  Alert,
 } from 'react-native'
 import { Image } from 'expo-image'
 import { BookmarkCheck } from 'lucide-react-native'
+import { tmdbApi } from '@/src/api/tmdbApi'
 
 const POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500'
 
 export default function WatchlistScreen() {
   const { watchlist } = useWatchlist()
   const [savedItems, setSavedItems] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  useFocusEffect(
-    useCallback(() => {
-      // Refetch saved items on focus
-    }, [])
-  )
+  useEffect(() => {
+    loadSavedShows()
+  }, [watchlist])
+
+  const loadSavedShows = useCallback(async () => {
+    if (watchlist.length === 0) {
+      setSavedItems([])
+      setLoading(false)
+      return
+    }
+
+    try {
+      setLoading(true)
+      const response = await tmdbApi.getTrending()
+      const allShows = response.data.results || []
+      
+      // Filter to only show saved items
+      const saved = allShows.filter(show => watchlist.includes(show.id))
+      setSavedItems(saved)
+    } catch (error) {
+      console.log('Error loading saved shows:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [watchlist])
 
   const renderSavedItem = ({ item }: { item: any }) => {
     const posterUrl = item.poster_path
@@ -64,7 +85,7 @@ export default function WatchlistScreen() {
     )
   }
 
-  if (savedItems.length === 0) {
+  if (watchlist.length === 0 || savedItems.length === 0) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
@@ -73,7 +94,7 @@ export default function WatchlistScreen() {
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyTitle}>No Saved Shows Yet</Text>
           <Text style={styles.emptyDescription}>
-            Save your favorite TV shows to view them here
+            Save your favorite TV shows from the TV Series tab
           </Text>
         </View>
       </View>
@@ -84,7 +105,7 @@ export default function WatchlistScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Saved Shows</Text>
-        <Text style={styles.count}>{watchlist.length} shows</Text>
+        <Text style={styles.count}>{savedItems.length} shows</Text>
       </View>
 
       <FlatList
@@ -130,6 +151,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 20,
   },
   emptyTitle: {
     fontSize: 18,
