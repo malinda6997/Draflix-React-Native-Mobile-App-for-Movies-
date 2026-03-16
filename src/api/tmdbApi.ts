@@ -267,6 +267,12 @@ export const tmdbApi = {
     api.get('/movie/top_rated', {
       params: { language: 'en-US', page },
     }),
+
+  // Get movie credits (cast and crew)
+  getMovieCredits: (movieId: number) =>
+    api.get(`/movie/${movieId}/credits`, {
+      params: { language: 'en-US' },
+    }),
 }
 
 export const getImageUrl = (path: string, width: number = 500) => {

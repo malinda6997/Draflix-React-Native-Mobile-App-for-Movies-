@@ -6,6 +6,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useEffect, useState } from 'react'
 import {
   FlatList,
+  Image,
   ImageBackground,
   Pressable,
   ScrollView,
@@ -25,21 +26,24 @@ export default function MovieDetailScreen() {
   const [movie, setMovie] = useState<any>(null)
   const [similarMovies, setSimilarMovies] = useState<any[]>([])
   const [videos, setVideos] = useState<any[]>([])
+  const [credits, setCredits] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [showFullOverview, setShowFullOverview] = useState(false)
 
   const loadMovieDetails = useCallback(async () => {
     try {
       setLoading(true)
-      const [detailsRes, similarRes, videosRes] = await Promise.all([
+      const [detailsRes, similarRes, videosRes, creditsRes] = await Promise.all([
         tmdbApi.getMovieDetails(movieId),
         tmdbApi.getSimilarMovies(movieId),
         tmdbApi.getMovieVideos(movieId),
+        tmdbApi.getMovieCredits(movieId),
       ])
 
       setMovie(detailsRes.data)
       setSimilarMovies(similarRes.data.results || [])
       setVideos(videosRes.data.results || [])
+      setCredits(creditsRes.data)
     } catch (error) {
       console.error('Error loading movie details:', error)
     } finally {
@@ -196,6 +200,121 @@ export default function MovieDetailScreen() {
           </Pressable>
         )}
       </View>
+
+      {/* Movie Info Details */}
+      <View style={styles.detailsSection}>
+        <Text style={styles.sectionTitle}>Production & Details</Text>
+        
+        <View style={styles.detailRow}>
+          <Text style={styles.detailLabel}>Status:</Text>
+          <Text style={styles.detailValue}>{movie.status || 'N/A'}</Text>
+        </View>
+
+        <View style={styles.detailRow}>
+          <Text style={styles.detailLabel}>Language:</Text>
+          <Text style={styles.detailValue}>{movie.original_language?.toUpperCase() || 'N/A'}</Text>
+        </View>
+
+        {movie.budget > 0 && (
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Budget:</Text>
+            <Text style={styles.detailValue}>${(movie.budget / 1000000).toFixed(1)}M</Text>
+          </View>
+        )}
+
+        {movie.revenue > 0 && (
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Revenue:</Text>
+            <Text style={styles.detailValue}>${(movie.revenue / 1000000).toFixed(1)}M</Text>
+          </View>
+        )}
+
+        {movie.production_countries && movie.production_countries.length > 0 && (
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Country:</Text>
+            <Text style={styles.detailValue}>
+              {movie.production_countries.map((c: any) => c.name).join(', ')}
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* Director & Writers */}
+      {credits && (
+        <>
+          {/* Director */}
+          {credits.crew && credits.crew.length > 0 && (
+            <View style={styles.crewSection}>
+              <Text style={styles.sectionTitle}>Director & Crew</Text>
+              {credits.crew
+                .filter((member: any) => member.job === 'Director')
+                .slice(0, 3)
+                .map((director: any) => (
+                  <View key={director.id} style={styles.crewMemberCard}>
+                    {director.profile_path && (
+                      <Image
+                        source={{ uri: getImageUrl(director.profile_path, 200) || '' }}
+                        style={styles.crewImage}
+                      />
+                    )}
+                    <View style={styles.crewInfo}>
+                      <Text style={styles.crewName}>{director.name}</Text>
+                      <Text style={styles.crewJob}>{director.job}</Text>
+                    </View>
+                  </View>
+                ))}
+
+              {/* Writers */}
+              {credits.crew.filter((member: any) => member.department === 'Writing').length > 0 && (
+                <View style={styles.writerSection}>
+                  <Text style={styles.subSectionTitle}>Writers</Text>
+                  {credits.crew
+                    .filter((member: any) => member.department === 'Writing')
+                    .slice(0, 2)
+                    .map((writer: any) => (
+                      <Text key={writer.id} style={styles.writerName}>
+                        {writer.name} ({writer.job})
+                      </Text>
+                    ))}
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* Cast */}
+          {credits.cast && credits.cast.length > 0 && (
+            <View style={styles.castSection}>
+              <Text style={styles.sectionTitle}>Cast</Text>
+              <FlatList
+                data={credits.cast.slice(0, 10)}
+                renderItem={({ item }) => (
+                  <View style={styles.castCard}>
+                    {item.profile_path ? (
+                      <Image
+                        source={{ uri: getImageUrl(item.profile_path, 200) || '' }}
+                        style={styles.castImage}
+                      />
+                    ) : (
+                      <View style={[styles.castImage, styles.castPlaceholder]}>
+                        <Text style={styles.castPlaceholderText}>No Image</Text>
+                      </View>
+                    )}
+                    <View style={styles.castInfo}>
+                      <Text style={styles.castName} numberOfLines={2}>{item.name}</Text>
+                      <Text style={styles.castRole} numberOfLines={2}>{item.character}</Text>
+                    </View>
+                  </View>
+                )}
+                keyExtractor={(item) => item.id.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                scrollEventThrottle={16}
+                contentContainerStyle={styles.castScroll}
+              />
+            </View>
+          )}
+        </>
+      )}
 
       {/* More Like This */}
       {similarMovies.length > 0 && (
@@ -393,7 +512,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   trailerButtonText: {
-    color: '#fff',
+    color: '#000',
     fontWeight: '700',
     fontSize: 15,
   },
@@ -469,5 +588,128 @@ const styles = StyleSheet.create({
   },
   moviesScroll: {
     gap: 8,
+  },
+  
+  // New styles for extended details
+  detailsSection: {
+    marginBottom: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1a1a2e',
+  },
+  detailLabel: {
+    color: '#FF0000',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  detailValue: {
+    color: '#ccc',
+    fontSize: 13,
+  },
+
+  // Cast styles
+  castSection: {
+    marginBottom: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  castScroll: {
+    gap: 12,
+    paddingRight: 16,
+  },
+  castCard: {
+    width: 110,
+    backgroundColor: '#0a0f15',
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#1a1a2e',
+  },
+  castImage: {
+    width: '100%',
+    height: 140,
+    backgroundColor: '#1a1a2e',
+  },
+  castPlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  castPlaceholderText: {
+    color: '#666',
+    fontSize: 10,
+    textAlign: 'center',
+  },
+  castInfo: {
+    padding: 8,
+  },
+  castName: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  castRole: {
+    color: '#999',
+    fontSize: 11,
+  },
+
+  // Crew styles
+  crewSection: {
+    marginBottom: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  crewMemberCard: {
+    flexDirection: 'row',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1a1a2e',
+  },
+  crewImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#1a1a2e',
+    marginRight: 12,
+  },
+  crewInfo: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  crewName: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  crewJob: {
+    color: '#FF0000',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  
+  writerSection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#1a1a2e',
+  },
+  subSectionTitle: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  writerName: {
+    color: '#aaa',
+    fontSize: 12,
+    marginBottom: 4,
   },
 })
