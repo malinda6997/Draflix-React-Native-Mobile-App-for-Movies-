@@ -37,6 +37,10 @@ export default function SearchScreen() {
     }
   }, [])
 
+  useEffect(() => {
+    loadInitialData()
+  }, [loadInitialData])
+
   const handleGoHome = () => {
     router.push('/(tabs)')
   }
@@ -108,7 +112,7 @@ export default function SearchScreen() {
         <View style={styles.container}>
           {/* Search Bar */}
           <View style={styles.searchBarContainer}>
-            <Pressable onPress={handleGoHome} style={styles.backButton}>
+            <Pressable onPress={handleBack} style={styles.backButton}>
               <ChevronLeft size={24} color="#fff" />
             </Pressable>
             <View style={styles.searchInputWrapper}>
