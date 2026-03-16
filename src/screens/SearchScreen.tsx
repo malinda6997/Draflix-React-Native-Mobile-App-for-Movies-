@@ -42,7 +42,16 @@ export default function SearchScreen() {
   }, [loadInitialData])
 
   const handleGoHome = () => {
-    router.push('/(tabs)')
+    try {
+      if (router.canGoBack()) {
+        router.back()
+      } else {
+        router.push('/(tabs)')
+      }
+    } catch (error) {
+      console.error('Navigation error:', error)
+      router.push('/(tabs)')
+    }
   }
 
   const handleSearch = async (query: string) => {
