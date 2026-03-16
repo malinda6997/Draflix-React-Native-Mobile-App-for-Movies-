@@ -36,8 +36,16 @@ export default function SearchScreen() {
       onPanResponderRelease: (evt, gestureState) => {
         // Check if swiping right (positive dx > 50)
         if (gestureState.dx > 50) {
-          // Trigger back navigation
-          router.back()
+          // Trigger back navigation - go to home
+          if (searched) {
+            // If in search results, clear search first
+            setSearchQuery('')
+            setSearchResults([])
+            setSearched(false)
+          } else {
+            // If in initial screen, replace with home tab
+            router.replace('/(tabs)')
+          }
         }
       },
     })
@@ -61,7 +69,8 @@ export default function SearchScreen() {
   }, [loadInitialData])
 
   const handleGoHome = () => {
-    router.back()
+    // Replace current search tab with home tab to go back to home
+    router.replace('/(tabs)')
   }
 
   const handleSearch = async (query: string) => {
