@@ -16,6 +16,7 @@ import { Bell, Search } from 'lucide-react-native'
 
 export default function HomeScreen() {
   const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState('')
   const [trendingMovies, setTrendingMovies] = useState<any[]>([])
   const [actionMovies, setActionMovies] = useState<any[]>([])
   const [comedyMovies, setComedyMovies] = useState<any[]>([])
@@ -66,6 +67,10 @@ export default function HomeScreen() {
     return () => clearInterval(interval)
   }, [mainTitles.length])
 
+  const handleSearchFocus = () => {
+    router.push('/(tabs)/search')
+  }
+
   if (loading && trendingMovies.length === 0) {
     return <LoadingSpinner />
   }
@@ -112,6 +117,9 @@ export default function HomeScreen() {
             style={styles.searchInput}
             placeholder="Search"
             placeholderTextColor="#999"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onFocus={handleSearchFocus}
           />
         </View>
       </View>
