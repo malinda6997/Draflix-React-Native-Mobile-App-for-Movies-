@@ -78,10 +78,6 @@ export default function SearchScreen() {
     setSearched(false)
   }
 
-  const handleGoHome = () => {
-    router.push('/(tabs)')
-  }
-
   const handleBack = () => {
     if (searched) {
       setSearchQuery('')
