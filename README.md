@@ -1,3 +1,5 @@
+![Draflix Banner](./readme-images/readme-banner.png)
+
 # 🎬 Draflix - Movie Discovery App
 
 A modern cross-platform movie discovery application built with React Native and Expo. Discover movies, manage your watchlist, watch trailers, and enjoy personalized recommendations.
