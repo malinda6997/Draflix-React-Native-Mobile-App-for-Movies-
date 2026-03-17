@@ -1,42 +1,47 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+import {
+    DarkTheme,
+    DefaultTheme,
+    ThemeProvider,
+} from "@react-navigation/native";
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="(tabs)" 
-          options={{ 
+        <Stack.Screen
+          name="(tabs)"
+          options={{
             headerShown: false,
             gestureEnabled: false,
-            animationEnabled: false
-          }} 
+            animationEnabled: false,
+          }}
         />
-        <Stack.Screen 
-          name="movie-detail" 
-          options={{ 
+        <Stack.Screen
+          name="movie-detail"
+          options={{
             headerShown: false,
-            animationEnabled: true 
-          }} 
+            animationEnabled: true,
+          }}
         />
-        <Stack.Screen 
-          name="trailer" 
-          options={{ 
+        <Stack.Screen
+          name="trailer"
+          options={{
             headerShown: false,
-            animationEnabled: true 
-          }} 
+            animationEnabled: true,
+          }}
         />
-        <Stack.Screen 
-          name="category" 
-          options={{ 
+        <Stack.Screen
+          name="category"
+          options={{
             headerShown: false,
-            animationEnabled: true 
-          }} 
+            animationEnabled: true,
+          }}
         />
       </Stack>
       <StatusBar style="light" />

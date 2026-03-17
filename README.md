@@ -22,7 +22,7 @@ A modern cross-platform movie discovery application built with React Native and 
 - **State Management**: React Hooks
 - **Local Storage**: AsyncStorage 2.2.0
 - **API Client**: Axios 1.13.6
-- **Authentication**: Google Sign-in (react-native-google-signin)
+- **UI Components**: Lucide React Native, Expo Vector Icons
 - **Video Playback**: React Native YouTube iFrame
 
 ## 📋 Prerequisites
@@ -34,7 +34,7 @@ Before you begin, ensure you have the following installed:
 - **iOS**: Xcode 15+ (for iOS simulator) or iPhone with Expo Go
 - **Android**: Android Studio with SDK (for Android emulator)
 - **TMDB API Key**: Get it from [themoviedb.org](https://www.themoviedb.org/settings/api)
-- **Google OAuth Credentials**: Set up via [Google Cloud Console](https://console.cloud.g
+
 ## 🚀 Quick Start
 
 ### 1. Clone and Install
@@ -53,7 +53,7 @@ EXPO_PUBLIC_TMDB_API_KEY=your_tmdb_api_key_here
 EXPO_PUBLIC_TMDB_BASE_URL=https://api.themoviedb.org/3
 ```
 
-Configure Google Sign-in by following [GOOGLE_LOGIN_SETUP.md](./GOOGLE_LOGIN_SETUP.md)
+### 3. Run Locally
 
 **Option 1: Expo Go on Physical Device (Recommended)**
 
@@ -89,15 +89,17 @@ npm run web
 ```
 draflix/
 ├── app/                          # Main app routes (Expo Router)
-│   ├── (auth)/                  # Authentication stack
-│   │   ├── sign-in.tsx
-│   │   └── sign-up.tsx
-│   ├── (── watchlist.tsx        # Saved movies
+│   ├── (tabs)/                  # Tab navigation stack
+│   │   ├── index.tsx            # Home screen
+│   │   ├── search.tsx           # Search movies
+│   │   ├── watchlist.tsx        # Saved movies
 │   │   ├── profile.tsx          # User profile
 │   │   └── trailer.tsx          # Trailer player
 │   ├── category.tsx             # Category browse
 │   ├── movie-detail.tsx         # Movie details
-``
+│   ├── trailer.tsx              # Trailer screen
+│   └── _layout.tsx              # Root layout
+│
 ├── src/
 │   ├── api/
 │   │   └── tmdbApi.ts           # TMDB API client
@@ -214,12 +216,6 @@ Ensure the package is installed:
 npm install @react-native-async-storage/async-storage@2.2.0
 ```
 
-### Google Sign-in Issues
-
-- Verify OAuth credentials in [Google Cloud Console](https://console.cloud.google.com/)
-- Check bundle ID and keystore fingerprints match configuration
-- See [GOOGLE_LOGIN_SETUP.md](./GOOGLE_LOGIN_SETUP.md) for detailed setup
-
 ### TMDB API Errors
 
 - Verify API key is correctly set in `.env`
@@ -242,7 +238,6 @@ npx expo start --port 8082
 ## 🔒 Security
 
 - Sensitive credentials stored in `.env` (never commit this file)
-- Google OAuth for secure authentication
 - AsyncStorage for local-only watchlist data
 - No sensitive data hardcoded in source
 
@@ -254,7 +249,6 @@ Key packages and their purposes:
 | ------------------------------------------- | ------------------------ |
 | `expo-router`                               | File-based routing       |
 | `@react-native-async-storage/async-storage` | Persistent local storage |
-| `@react-native-google-signin/google-signin` | Google authentication    |
 | `axios`                                     | HTTP requests            |
 | `react-native-youtube-iframe`               | YoutTube video embedding |
 | `lucide-react-native`                       | Icon library             |
@@ -281,9 +275,9 @@ Required `.env` file:
 # TMDB API Configuration
 EXPO_PUBLIC_TMDB_API_KEY=your_api_key_here
 EXPO_PUBLIC_TMDB_BASE_URL=https://api.themoviedb.org/3
+```
 
-# Google OAuth (See GOOGLE_LOGIN_SETUP.md)
-GOOGLE_WEB_CLIENT_ID=your_web_client_id
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -298,14 +292,13 @@ This project is licensed under the MIT License.
 ## 📞 Support & Documentation
 
 - **Main Documentation**: [IMPLEMENTATION_COMPLETE.md](./IMPLEMENTATION_COMPLETE.md)
-- **Google Login Setup**: [GOOGLE_LOGIN_SETUP.md](./GOOGLE_LOGIN_SETUP.md)
 - **Expo Docs**: [https://docs.expo.dev](https://docs.expo.dev)
 - **TMDB API Docs**: [https://developer.themoviedb.org](https://developer.themoviedb.org)
 
-## 
+## 🎉 Acknowledgments
+
 - Built with [Expo](https://expo.dev)
 - Movie data from [The Movie Database (TMDB)](https://www.themoviedb.org/)
-- Google OAuth integration
 - React Native community
 
 ---
