@@ -1,16 +1,46 @@
 import { Image } from "expo-image";
+import * as navigationBar from "expo-navigation-bar";
 import { useRouter } from "expo-router";
-import React from "react";
+import * as splashScreen from "expo-splash-screen";
+import React, { useEffect } from "react";
 import {
   ImageBackground,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 
+// Keep the splash screen visible while we load
+splashScreen.preventAutoHideAsync();
+
 export default function SplashScreen() {
   const router = useRouter();
+
+  useEffect(() => {
+    // Hide the splash screen after component mounts
+    const hideSplashScreen = async () => {
+      try {
+        // Set navigation bar color on Android
+        if (Platform.OS === "android") {
+          await navigationBar.setBackgroundColorAsync("#0a0a15");
+          await navigationBar.setPositionAsync("absolute");
+        }
+        // Hide the expo splash screen
+        await splashScreen.hideAsync();
+      } catch (error) {
+        console.error("Error hiding splash screen:", error);
+      }
+    };
+
+    // Delay the splash screen hiding slightly for better UX
+    const timer = setTimeout(hideSplashScreen, 500);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, []);
 
   const handleStartNow = () => {
     router.push("/(tabs)");
