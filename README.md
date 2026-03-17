@@ -1,50 +1,329 @@
-# Welcome to your Expo app 👋
+# 🎬 Draflix - Movie Discovery App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A modern cross-platform movie discovery application built with React Native and Expo. Discover movies, manage your watchlist, watch trailers, and personalize your experience with Google authentication.
 
-## Get started
+## ✨ Features
 
-1. Install dependencies
+- **🔐 Authentication** - Secure Google Sign-in integration
+- **🎥 Movie Discovery** - Browse trending and popular movies
+- **🔍 Advanced Search** - Search movies by title, genre, and category
+- **⭐ Watchlist** - Save and manage your favorite movies locally
+- **🎞️ Trailers** - Watch movie trailers directly in the app
+- **📱 Responsive UI** - Optimized for iOS, Android, and Web
+- **🎨 Modern Design** - Clean, intuitive interface with smooth navigation
+- **⚡ Offline Support** - Persistent watchlist with AsyncStorage
+- **🌓 Theme Support** - Automatic light/dark mode based on system preferences
 
-   ```bash
-   npm install
-   ```
+## 🛠️ Tech Stack
 
-2. Start the app
+- **Frontend Framework**: React Native 0.81.5
+- **Development Framework**: Expo 54.0.33
+- **Navigation**: Expo Router 6.0.23
+- **Language**: TypeScript 5.9.2
+- **State Management**: React Hooks
+- **Local Storage**: AsyncStorage 2.2.0
+- **API Client**: Axios 1.13.6
+- **Authentication**: Google Sign-in (react-native-google-signin)
+- **UI Components**: Lucide React Native, Expo Vector Icons
+- **Video Playback**: React Native YouTube iFrame
 
-   ```bash
-   npx expo start
-   ```
+## 📋 Prerequisites
 
-In the output, you'll find options to open the app in a
+Before you begin, ensure you have the following installed:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- **Node.js** 18+ and npm/yarn
+- **Expo CLI**: `npm install -g expo-cli`
+- **iOS**: Xcode 15+ (for iOS simulator) or iPhone with Expo Go
+- **Android**: Android Studio with SDK (for Android emulator)
+- **TMDB API Key**: Get it from [themoviedb.org](https://www.themoviedb.org/settings/api)
+- **Google OAuth Credentials**: Set up via [Google Cloud Console](https://console.cloud.google.com/)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🚀 Quick Start
 
-## Get a fresh project
-
-When you're ready, run:
+### 1. Clone and Install
 
 ```bash
+# Install dependencies
+npm install
+```
+
+### 2. Environment Configuration
+
+Create a `.env` file in the root directory:
+
+```env
+EXPO_PUBLIC_TMDB_API_KEY=your_tmdb_api_key_here
+EXPO_PUBLIC_TMDB_BASE_URL=https://api.themoviedb.org/3
+```
+
+Configure Google Sign-in by following [GOOGLE_LOGIN_SETUP.md](./GOOGLE_LOGIN_SETUP.md)
+
+### 3. Run Locally
+
+**Option 1: Expo Go on Physical Device (Recommended)**
+
+```bash
+npm start
+# Scan the QR code with your iPhone using Expo Go app
+# or with Android using the Expo app
+```
+
+**Option 2: iOS Simulator**
+
+```bash
+npm run ios
+# Requires Xcode and macOS
+```
+
+**Option 3: Android Emulator**
+
+```bash
+npm run android
+# Requires Android Studio
+```
+
+**Option 4: Web Browser**
+
+```bash
+npm run web
+# Quick testing in a web browser
+```
+
+## 📁 Project Structure
+
+```
+draflix/
+├── app/                          # Main app routes (Expo Router)
+│   ├── (auth)/                  # Authentication stack
+│   │   ├── sign-in.tsx
+│   │   └── sign-up.tsx
+│   ├── (tabs)/                  # Tab navigation stack
+│   │   ├── index.tsx            # Home screen
+│   │   ├── search.tsx           # Search movies
+│   │   ├── watchlist.tsx        # Saved movies
+│   │   ├── profile.tsx          # User profile
+│   │   └── trailer.tsx          # Trailer player
+│   ├── category.tsx             # Category browse
+│   ├── movie-detail.tsx         # Movie details
+│   └── oauth-callback.tsx       # OAuth redirect handler
+│
+├── src/
+│   ├── api/
+│   │   └── tmdbApi.ts           # TMDB API client
+│   ├── components/
+│   │   ├── BottomNavBar.tsx
+│   │   ├── HorizontalMovieScroll.tsx
+│   │   ├── LoadingSpinner.tsx
+│   │   └── MovieCard.tsx
+│   ├── hooks/
+│   │   └── useWatchlist.ts      # Watchlist management
+│   └── screens/
+│       ├── HomeScreen.tsx
+│       ├── SearchScreen.tsx
+│       ├── WatchlistScreen.tsx
+│       ├── ProfileScreen.tsx
+│       ├── MovieDetailScreen.tsx
+│       ├── TrailerScreen.tsx
+│       └── SplashScreen.tsx
+│
+├── assets/                       # Images and static assets
+├── components/                   # Shared UI components
+├── constants/                    # App theme and constants
+├── hooks/                        # Custom React hooks
+└── package.json                  # Dependencies and scripts
+```
+
+## 🎯 Main Features Explained
+
+### Home Screen
+
+Browse trending and popular movies with horizontal scrollable categories.
+
+### Search
+
+Full-text search across the TMDB movie database with real-time results.
+
+### Watchlist
+
+- Add/remove movies to your personal watchlist
+- Persistent storage using AsyncStorage
+- Quick access to your saved movies
+
+### Movie Details
+
+- Complete movie information (synopsis, ratings, cast)
+- Release date, runtime, and genres
+- Related/recommended movies
+
+### Trailers
+
+- In-app YouTube trailer player
+- Full-screen playback support
+
+### Authentication
+
+- Secure Google Sign-in
+- Profile management
+- Session persistence
+
+## 📡 API Integration
+
+The app uses **The Movie Database (TMDB) API** v3:
+
+```
+Base URL: https://api.themoviedb.org/3
+```
+
+**Supported Endpoints:**
+
+- `/trending/movie/week` - Trending movies
+- `/movie/popular` - Popular movies
+- `/movie/{id}` - Movie details
+- `/movie/{id}/videos` - Movie trailers
+- `/search/movie` - Search movies
+- `/discover/movie` - Discover with filters
+
+## 🔧 Available Scripts
+
+```bash
+# Start development server with Expo
+npm start
+
+# Run on iOS simulator (macOS only)
+npm run ios
+
+# Run on Android emulator
+npm run android
+
+# Run in web browser
+npm run web
+
+# Lint code
+npm lint
+
+# Reset project to fresh state
 npm run reset-project
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 🐛 Troubleshooting
 
-## Learn more
+### Android/iOS Bundling Errors
 
-To learn more about developing your project with Expo, look at the following resources:
+**Issue**: "Unable to resolve" module errors
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+# Clear cache and reinstall
+npm install
+npx expo start --clear
+```
 
-## Join the community
+### AsyncStorage Not Found
 
-Join our community of developers creating universal apps.
+Ensure the package is installed:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npm install @react-native-async-storage/async-storage@2.2.0
+```
+
+### Google Sign-in Issues
+
+- Verify OAuth credentials in [Google Cloud Console](https://console.cloud.google.com/)
+- Check bundle ID and keystore fingerprints match configuration
+- See [GOOGLE_LOGIN_SETUP.md](./GOOGLE_LOGIN_SETUP.md) for detailed setup
+
+### TMDB API Errors
+
+- Verify API key is correctly set in `.env`
+- Check API rate limits (40 requests/10 seconds per IP)
+- Ensure internet connectivity
+
+### Port Already in Use
+
+```bash
+# Use a different port
+npx expo start --port 8082
+```
+
+## 📱 Supported Platforms
+
+- ✅ **iOS** 13.0+ (via Xcode or Expo Go)
+- ✅ **Android** 5.0+ (via emulator or Expo Go)
+- ✅ **Web** (modern browsers)
+
+## 🔒 Security
+
+- Sensitive credentials stored in `.env` (never commit this file)
+- Google OAuth for secure authentication
+- AsyncStorage for local-only watchlist data
+- No sensitive data hardcoded in source
+
+## 📦 Dependencies
+
+Key packages and their purposes:
+
+| Package                                     | Purpose                  |
+| ------------------------------------------- | ------------------------ |
+| `expo-router`                               | File-based routing       |
+| `@react-native-async-storage/async-storage` | Persistent local storage |
+| `@react-native-google-signin/google-signin` | Google authentication    |
+| `axios`                                     | HTTP requests            |
+| `react-native-youtube-iframe`               | YoutTube video embedding |
+| `lucide-react-native`                       | Icon library             |
+
+## 🚢 Deployment
+
+### For Production Build
+
+```bash
+# iOS
+eas build --platform ios --auto-submit
+
+# Android
+eas build --platform android --auto-submit
+```
+
+Requires EAS CLI and Expo account. See [Expo Deployment Guide](https://docs.expo.dev/eas/) for details.
+
+## 📝 Environment Variables
+
+Required `.env` file:
+
+```env
+# TMDB API Configuration
+EXPO_PUBLIC_TMDB_API_KEY=your_api_key_here
+EXPO_PUBLIC_TMDB_BASE_URL=https://api.themoviedb.org/3
+
+# Google OAuth (See GOOGLE_LOGIN_SETUP.md)
+GOOGLE_WEB_CLIENT_ID=your_web_client_id
+GOOGLE_IOS_CLIENT_ID=your_ios_client_id
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 📞 Support & Documentation
+
+- **Main Documentation**: [IMPLEMENTATION_COMPLETE.md](./IMPLEMENTATION_COMPLETE.md)
+- **Google Login Setup**: [GOOGLE_LOGIN_SETUP.md](./GOOGLE_LOGIN_SETUP.md)
+- **Expo Docs**: [https://docs.expo.dev](https://docs.expo.dev)
+- **TMDB API Docs**: [https://developer.themoviedb.org](https://developer.themoviedb.org)
+
+## 🎉 Acknowledgments
+
+- Built with [Expo](https://expo.dev)
+- Movie data from [The Movie Database (TMDB)](https://www.themoviedb.org/)
+- Google OAuth integration
+- React Native community
+
+---
+
+**Happy coding! 🚀** If you encounter issues, check the troubleshooting section or refer to the detailed setup guides.
